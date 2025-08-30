@@ -5,6 +5,7 @@ pygame.init()
 #Constants
 LightGrey = (230, 230, 230)
 Pink = (233, 128, 128)
+Blue = (10, 100, 200)
 
 coordinate_vektor1 = (280, 300)
 coordinate_vektor2 = (280, 450)
@@ -66,6 +67,7 @@ chooseAgame_text = chooseAgame_font.render("choose a game...", True, Pink)
 chooseAgame_rect = chooseAgame_text.get_rect(center = coordinate_chooseAgame)
 
 #funktionen für screen
+
 def menu_defaultVektorScreening():
     global screen
     for vektor in menu_defaultVektorRectList:
@@ -80,3 +82,17 @@ def menu_mainMenuPicScreening():
     screen.blit(mainMenuPic_text, mainMenuPic_rect)
     screen.blit(chooseAgame_text, chooseAgame_rect)
     
+menu_music_playing = True  # außerhalb der Schleife definieren
+m = False
+def MenuMusic(menuState):
+    global menu_music_playing
+    global m
+    if menu_music_playing:
+        pygame.mixer.music.load('environment/audios/MenuBackgroundSound.mp3')
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
+        menu_music_playing = False
+
+    if m:
+        pygame.mixer.music.stop()
+        m = False
