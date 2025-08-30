@@ -63,16 +63,28 @@ def main():
                     print("StartScreen") 
                 
                 #menuScreen
-                elif menu_state and mh.defaultVektor_rect_Game1.collidepoint(mouse_pos):
-                    menu_state = False
-                    jumpAndRun_state = True
-                    menuMusik.stop()
-                    gameStartSound.play()
-                    time.sleep(0.2)
-                    jarMusik.play()
+                elif menu_state:
+                    if mh.defaultVektor_rect_Game1.collidepoint(mouse_pos):
+                        menu_state = False
+                        jumpAndRun_state = True
+                        menuMusik.stop()
+                        gameStartSound.play()
+                        time.sleep(0.2)
+                        jarMusik.play()
+                    #For next Games
+                    # if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos):
+                    #     #doSth
+                    # if mh.defaultVektor_rect_Game3.collidepoint(mouse_pos):
+                    #     #doSth
+                    # if mh.defaultVektor_rect_Game4.collidepoint(mouse_pos):
+                    #     #doSth
+                    
+                
+
             
             #KeyDown Hanlding
             if event.type == pygame.KEYDOWN:
+                
                 #menuState
                 if menu_state and event.key == pygame.K_ESCAPE:
                     pygame.quit()
@@ -82,6 +94,8 @@ def main():
                 elif jumpAndRun_state and event.key == pygame.K_ESCAPE:
                     jumpAndRun_state = False
                     menu_state = True
+                    jarMusik.stop()
+                    menuMusik.play()
         
         
         
