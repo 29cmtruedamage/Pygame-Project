@@ -27,8 +27,9 @@ def main():
     jumpAndRun_GameOnState = False
     
     #new Self-defined userevenets
+    timeToSpawnObstacle = 500
     obstacleSpawnTimer = pygame.USEREVENT + 1
-    pygame.time.set_timer(obstacleSpawnTimer, 1000)
+    pygame.time.set_timer(obstacleSpawnTimer, timeToSpawnObstacle)
     #Underground
     underground_image = pygame.transform.scale(pygame.image.load('environment/graphics/Untergrund.png'), (1050, 250)).convert_alpha()
     underground_rect = underground_image.get_rect(topleft = (0, 500))
@@ -90,6 +91,7 @@ def main():
                         gameStartSound.play()
                         time.sleep(0.2)
                         jarMusik.play(10)
+                        startTime = pygame.time.get_ticks()
                     #For next Games
                     # if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos):
                     #     #doSth
@@ -118,14 +120,19 @@ def main():
                         menuMusik.play(10)
                         
                     if jumpAndRun_GameOnState:
-                        if event.key == pygame.K_SPACE:
-                            jumpAndRun_GameOnState = False
-                            startTime = pygame.time.get_ticks()
-                    if jumpAndRun_GameOnState ==False:
-                        if event.key == pygame.K_RIGHT:
+                        print("") #PLATZHALTER
+                            
+                    if jumpAndRun_GameOnState == False:
+                        if event.key == pygame.K_RETURN: #Return = EnterTaste
                             jumpAndRun_GameOnState = True     
-        
-        
+                            startTime = pygame.time.get_ticks()
+                            
+            #specific event Types:
+            if event.type == obstacleSpawnTimer: 
+                obstacle_group.add(jar.Obstacle(random.choice(['bird'])))
+                #'bird','tree1','tree2','bird','tree1','tree2','tree3','mushroom'
+                
+                
         #State Handling
                      
         if startScreenState:
@@ -145,18 +152,28 @@ def main():
         if jumpAndRun_state:
             #KeyDown event handling
             if jumpAndRun_GameOnState:
+                
                 jar.drawEnvironment(screen, mh.background_image, mh.background_rect, underground_image, underground_rect)
-                screen.blit(underground_image, underground_rect)       
+                      
                 score = jar.drawScore(screen, startTime, highScore=highScore)
                 print("GAME ONNNN")
                 highScore = jar.checkHighscore(highScore, score)
-            else:
-                print("Game Over")
+                player.draw(screen)
+                player.update()
                 
+                obstacle_group.draw(screen)
+                obstacle_group.update()
+                jumpAndRun_GameOnState = jar.collisionCheck(player, obstacle_group)
+            else:
+                #screen.fill((0,0,0))
+                player.sprite.playerReset()
+                print("Game Over")
+                obstacle_group.empty()
+                jar.gameOverScreen(screen)
                 
                 
         #essentials
-        clock.tick(60)
+        clock.tick(80)
         pygame.display.update()
         
 if __name__ == "__main__":
