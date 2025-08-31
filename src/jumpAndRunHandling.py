@@ -8,6 +8,8 @@ pygame.init()
 colourGreen = (0, 139, 69)
 colourBeige = (255,222,173)
 
+generalSpeed = 1
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -37,7 +39,8 @@ class Player(pygame.sprite.Sprite):
         self.jumpSound.set_volume(0.5)
         self.gravity = 0
         self.jumpHeight = -12
-
+        self.playerSpeed = 0.1
+        self.gravitySpeed = 0.33
     def playerInput(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and self.rect.bottom >= 500:
@@ -45,7 +48,7 @@ class Player(pygame.sprite.Sprite):
             self.jumpSound.play()
             
     def playerJumpHandling(self):
-        self.gravity += 0.33
+        self.gravity += self.gravitySpeed
         self.rect.y += self.gravity
         if self.rect.bottom >= self.player_y:
             self.rect.bottom = self.player_y
@@ -54,7 +57,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom != self.player_y:
             self.image = self.playerJump
         else:
-            self.index += 0.1
+            self.index += self.playerSpeed
             self.index = self.index % len(self.animationList)
             helperIndex = self.index
             self.image = self.animationList[int(helperIndex)]
@@ -62,12 +65,18 @@ class Player(pygame.sprite.Sprite):
     def playerReset(self):
         self.rect.bottom = self.player_y
         self.gravity = 0
+        self.playerSpeed = 0.1
+        self.gravitySpeed = 0.33
+        
+    def playerSpeedUp(self):
+        self.playerSpeed = 0.3
+        self.gravitySpeed = 0.5
     def update(self):
         self.playerInput()
         self.playerJumpHandling()
         self.playerAnimation()
         self.hitbox.center = self.rect.center
-        
+    
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self,type):
         super().__init__()
@@ -85,7 +94,7 @@ class Obstacle(pygame.sprite.Sprite):
             bird3 = pygame.transform.flip(bird3_def, True, False)
             
             self.frames = [bird1, bird2, bird3]
-            y_pos = 300
+            y_pos = 350
         if type == 'tree1':
             tree1 = pygame.transform.rotozoom(pygame.image.load('environment/obstacles/Tree_1.png').convert_alpha(), 0, treeScale)
             self.frames = [tree1]
@@ -105,8 +114,8 @@ class Obstacle(pygame.sprite.Sprite):
         
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(midbottom = (randint(900, 1000), y_pos))
-        self.obstacleSpeed = 4
+        self.rect = self.image.get_rect(midbottom = (randint(1100, 1300), y_pos))
+        self.obstacleSpeed = 4 
         
     def animation_state(self):
         self.animation_index += 0.1 
@@ -116,19 +125,34 @@ class Obstacle(pygame.sprite.Sprite):
     def destroy(self):
         if self.rect.x <= -100: 
              self.kill()
-                
+    
+    def obstacleSpeedUp(self):
+        self.obstacleSpeed = 12
+        
+    def obstacleReset(self):
+        self.obstacleSpeed = 4 #Ursprungswert 
+        
     def update(self):
         self.animation_state()
         self.rect.x -= self.obstacleSpeed
         self.destroy()
+
+
+def obstacle_SpeedUp(obstacle_group):
+    for obstacle in obstacle_group:
+        obstacle.obstacleSpeedUp()
+        
+def obstacle_Reset(obstacle_group):
+    for obstacle in obstacle_group:
+        obstacle.obstacleReset()
 
 score_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 55)
 highScore_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 40)
 
 def drawScore(screen, startTime, highScore):
     currentScore = int((pygame.time.get_ticks() - startTime) / 100)
-    score_text = score_font.render(f"Your Score: {currentScore}", True, 'Black')
-    highScore_text = highScore_font.render(f"HIGHSCORE: {highScore}", False, 'Black')
+    score_text = score_font.render(f" Your Score: {currentScore} ", True, 'Black')
+    highScore_text = highScore_font.render(f" HIGHSCORE: {highScore} ", False, 'Black')
     
     score_rect_Score = score_text.get_rect(center = (500, 150))
     score_rect_HighScore = highScore_text.get_rect(center = (500, 50))
@@ -143,13 +167,34 @@ def checkHighscore(highScore, currentScore):
         return highScore
     else: return currentScore
     
-def drawEnvironment(screen, background,background_rect, underground, underground_rect):
-    screen.blit(background, background_rect)
-    screen.blit(underground, underground_rect)
+def environmentReset(rectList):
+    rectList[0].center = (500, 300)
+    rectList[1].center = (1500, 300)
+    rectList[2].midtop = (500, 500)
+    rectList[3].midtop = (1500, 500)
 
-def collisionCheck(player, obstacle_group):
+def drawEnvironment(screen, b_image, u_image, rectList):
+    screen.blit(b_image, rectList[0])
+    screen.blit(b_image, rectList[1])
+    screen.blit(u_image, rectList[2])
+    screen.blit(u_image, rectList[3])
+    
+#[b_rect1, b_rect2, u_rect1, u_rect2]
+def manageEnvironment(rectList, backgroundSpeed, undergroundSpeed):
+    rectList[0].x -= backgroundSpeed
+    rectList[1].x -= backgroundSpeed
+    
+    rectList[2].x -= undergroundSpeed
+    rectList[3].x -= undergroundSpeed
+    
+    for rect in rectList:
+        if rect.right <= 12:
+            rect.left = 1000
+            
+def collisionCheck(player, obstacle_group, gameOverSound):
     for obstacle_rect in obstacle_group:
         if player.sprite.hitbox.colliderect(obstacle_rect.rect):
+            gameOverSound.play()
             return False
     return True
 
@@ -157,25 +202,23 @@ gameOverScreen_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 
 gameOverPressEnter_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 50)
 gameOverCenter = (500, 200)
 gameOverPressEnterCenter = (500, 400)
+returnBackMenuCenter = (500, 460)
 
 def gameOverScreen(screen):
     gameOverScreen_text = gameOverScreen_font.render("GAME OVER", False, colourBeige)
     gameOverScreen_rect = gameOverScreen_text.get_rect(center = gameOverCenter)
     
-    gameOverPressEnter_text = gameOverPressEnter_font.render("PRESS ENTER TO RESTART...", True, colourBeige)
+    gameOverPressEnter_text = gameOverPressEnter_font.render("PRESS ENTER TO RESTART", True, colourBeige)
     gameOverPressEnter_rect = gameOverPressEnter_text.get_rect(center = gameOverPressEnterCenter)
+    
+    returnBackMenu_text = gameOverPressEnter_font.render("PRESS ESC TO RETURN TO MENU", True, colourBeige)
+    returnBackMenu_rect = returnBackMenu_text.get_rect(center = returnBackMenuCenter)
     screen.fill(colourGreen)
     
     screen.blit(gameOverScreen_text, gameOverScreen_rect)
     screen.blit(gameOverPressEnter_text, gameOverPressEnter_rect)
+    screen.blit(returnBackMenu_text, returnBackMenu_rect)
     
-    
-#background_image = mh.background_image
-#background_rect = mh.background_rect
 
-#underground_image = pygame.transform.scale(pygame.image.load('environment/graphics/Untergrund.png'), (1050, 250)).convert_alpha()
-#underground_rect = underground_image.get_rect(topleft = (0, 500))
 
-#underground_image = mh
-#def environmentManagement(screen):
     
