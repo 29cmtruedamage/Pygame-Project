@@ -151,6 +151,7 @@ def main():
                         speedUp = False
                         menu_state = True
                         jar.environmentReset(environmentRectList)
+                        player.sprite.playerReset()
                         jarMusik.stop()
                         menuMusik.play(15)
                         
