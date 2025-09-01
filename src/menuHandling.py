@@ -4,6 +4,7 @@ from main import screen
 pygame.init() 
 #Constants
 LightGrey = (230, 230, 230)
+DarkGrey =  (130, 130, 130)
 Pink = (233, 128, 128)
 Blue = (10, 100, 200)
 
@@ -67,11 +68,21 @@ chooseAgame_text = chooseAgame_font.render("choose a game...", True, Pink)
 chooseAgame_rect = chooseAgame_text.get_rect(center = coordinate_chooseAgame)
 
 #funktionen für screen
-
-def menu_defaultVektorScreening():
+# def checkColl(mouse_pos):
+#     global screen
+#     for vektor in menu_defaultVektorRectList:
+#         if vektor.collidepoint(mouse_pos):
+#             pygame.draw.rect(screen, DarkGrey, vektor, 0, 50)
+#         else:
+#             pygame.draw.rect(screen, LightGrey, vektor, 0, 50)
+            
+def menu_defaultVektorScreening(mouse_pos):
     global screen
     for vektor in menu_defaultVektorRectList:
-        pygame.draw.rect(screen, LightGrey, vektor, 0, 50)
+        if vektor.collidepoint(mouse_pos):
+            pygame.draw.rect(screen, DarkGrey, vektor, 0, 50)
+        else:
+            pygame.draw.rect(screen, LightGrey, vektor, 0, 50)
         
 def menu_vektorScreening():
     for key in menu_vektorMap:

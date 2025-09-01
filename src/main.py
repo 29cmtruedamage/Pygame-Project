@@ -132,7 +132,7 @@ def main():
                     # if mh.defaultVektor_rect_Game4.collidepoint(mouse_pos):
                     #     #doSth
                     
-                
+            
 
             
             #KeyDown Hanlding
@@ -151,6 +151,7 @@ def main():
                         speedUp = False
                         menu_state = True
                         jar.environmentReset(environmentRectList)
+                        player.sprite.playerReset()
                         jarMusik.stop()
                         menuMusik.play(15)
                         
@@ -177,6 +178,7 @@ def main():
                     obstacle_group.add(jar.Obstacle(random.choice(['bird','tree1','tree2','bird','tree1','tree2','tree3','mushroom'])))
                     jar.obstacle_SpeedUp(obstacle_group)
                     
+                    
         #State Handling
         # 
                      
@@ -191,7 +193,7 @@ def main():
             print("Menu")
             
             mh.menu_mainMenuPicScreening()
-            mh.menu_defaultVektorScreening()
+            mh.menu_defaultVektorScreening(mouse_pos)
             mh.menu_vektorScreening()
             
         if jumpAndRun_state:
