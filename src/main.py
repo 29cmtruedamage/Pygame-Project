@@ -3,6 +3,7 @@ from sys import exit
 import random
 import menuHandling as mh
 import jumpAndRunHandling as jar
+import pingPongHandling as pp
 import pygame.docs
 import time
 
@@ -77,6 +78,8 @@ def main():
     pongGameBM = pygame.mixer.Sound('environment/audios/PongGameBM.mp3')
     pongGameBM.set_volume(0.5)
     
+    #colours 
+    LightBlue = (204, 235, 255)
     #helper variables
     #time
     currentTime = pygame.time.get_ticks()
@@ -84,25 +87,20 @@ def main():
     #score
     highScore = 0
     score = 0
+    #DECLARING OBJECTS
     #declaring player and obstacles
     player = pygame.sprite.GroupSingle()
     player.add(jar.Player())
     
     obstacle_group = pygame.sprite.Group()
+    #declaring paddles
+    paddle1 = pygame.sprite.GroupSingle()
+    paddle1.add(pp.Paddle('player1'))
+
+    paddle2 = pygame.sprite.GroupSingle()
+    paddle2.add(pp.Paddle('player2'))
+
     
-    def jarGameOver():
-        global backgroundSpeed, undergroundSpeed, speedUp, score
-        jar.gameOverScreen(screen)
-        backgroundSpeed = 1
-        undergroundSpeed = 4
-        jar.environmentReset(environmentRectList)
-        player.sprite.playerReset()
-        speedUp = False
-        score = 0
-        obstacle_group.empty()
-        print("Game Over")
-        jarMusik.stop()
-        
     #game loop
     while gameStatus:
         mouse_pos = pygame.mouse.get_pos()
@@ -244,8 +242,13 @@ def main():
                 print("Game Over")
                 jarMusik.stop()
         
-                
-                
+        if PongGame_state:
+            screen.fill(LightBlue)
+            paddle1.draw(screen)
+            paddle2.draw(screen)
+            paddle1.update()
+            paddle2.update()
+            
         #essentials
         clock.tick(80)
         pygame.display.update()
