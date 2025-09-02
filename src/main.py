@@ -26,6 +26,9 @@ def main():
     jumpAndRun_GameOnState = False
     speedUp = False
     
+    PongGame_state = False
+    PongGame_GameOnState = False
+    
     #new Self-defined USEREVENTS
     timeToSpawnObstacle = 2000
     obstacleSpawnTimer = pygame.USEREVENT + 1
@@ -67,6 +70,12 @@ def main():
     
     jarMusik = pygame.mixer.Sound('environment/audios/JumpAndRunBM.mp3')
     jarMusik.set_volume(0.5)
+    
+    pongBallSound = pygame.mixer.Sound('environment/audios/BallSound.mp3')
+    pongBallSound.set_volume(0.5)
+    
+    pongGameBM = pygame.mixer.Sound('environment/audios/PongGameBM.mp3')
+    pongGameBM.set_volume(0.5)
     
     #helper variables
     #time
@@ -125,8 +134,14 @@ def main():
                         startTime = pygame.time.get_ticks()
                         obstacle_group.empty()
                     #For next Games
-                    # if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos):
-                    #     #doSth
+                    if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos):
+                        menu_state = False
+                        PongGame_state = True
+                        menuMusik.stop()
+                        gameStartSound.play()
+                        time.sleep(0.2)
+                        pongGameBM.play(15)
+                        screen.fill((0,0,0))
                     # if mh.defaultVektor_rect_Game3.collidepoint(mouse_pos):
                     #     #doSth
                     # if mh.defaultVektor_rect_Game4.collidepoint(mouse_pos):
@@ -155,8 +170,6 @@ def main():
                         jarMusik.stop()
                         menuMusik.play(15)
                         
-                    if jumpAndRun_GameOnState:
-                        print("") #PLATZHALTER
                             
                     if jumpAndRun_GameOnState == False:
                         if event.key == pygame.K_RETURN: #Return = EnterTaste
@@ -164,6 +177,13 @@ def main():
                             startTime = pygame.time.get_ticks()
                             jarMusik.play(15)
                             
+                elif PongGame_state:
+                    if event.key == pygame.K_ESCAPE:
+                        PongGame_state = False
+                        menu_state = True
+                        jar.environmentReset(environmentRectList)
+                        pongGameBM.stop()
+                        menuMusik.play(15)
             #specific event Types:
             if jumpAndRun_GameOnState and not speedUp:
                 if event.type == obstacleSpawnTimer and score < firstLevel:
