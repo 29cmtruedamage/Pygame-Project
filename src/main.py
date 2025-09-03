@@ -199,9 +199,14 @@ def main():
                         PongGame_state = False
                         menu_state = True
                         jar.environmentReset(environmentRectList)
+                        
                         pongGameBM.stop()
                         pongGameWinner.stop()
                         menuMusik.play(15)
+                        ball_x_pos, ball_y_pos, scoreP1, scoreP2 = pp.resetGame(ball_x_pos, 
+                                                                        ball_y_pos, 
+                                                                        paddle1, paddle2, 
+                                                                        scoreP1, scoreP2)
                         
                     if PongGame_GameOnState == False:
                         if event.key == pygame.K_RETURN:

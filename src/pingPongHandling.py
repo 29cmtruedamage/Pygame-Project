@@ -45,6 +45,13 @@ class Paddle(pygame.sprite.Sprite):
             
 def drawPongScreen(screen, BackgroundColour, BorderColour):
     screen.fill(BackgroundColour)
+    whichPlay_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 30)
+    whichPlay_p1 = whichPlay_font.render("Player 1", True, 'Black')
+    whichPlay_p2 = whichPlay_font.render("Player 2", True, 'Black')
+    whichPlay_p1_rect = whichPlay_p1.get_rect(center = (100, 40))
+    whichPlay_p2_rect = whichPlay_p2.get_rect(center = (900, 40))
+    screen.blit(whichPlay_p1, whichPlay_p1_rect)
+    screen.blit(whichPlay_p2, whichPlay_p2_rect)
     top_border = pygame.draw.line(screen, BorderColour, (0, 10), (1000, 10), 20)
     bottom_border = pygame.draw.line(screen, BorderColour, (0, 590), (1000, 590), 20)
     return top_border, bottom_border
@@ -114,7 +121,7 @@ def pongGameOverScreen(screen, score1, score2):
     if score1 == 5 or score2 == 5:
         screen.fill('Blue')
         winner_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 90)
-        winner_text = winner_font.render(f"{winner} is Winner!", True, 'White')
+        winner_text = winner_font.render(f"{winner} has Won!", True, 'White')
         winner_rect = winner_text.get_rect(center = (500, 200))
         
         playAgain_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 60)
