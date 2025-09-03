@@ -1,9 +1,10 @@
 import pygame
 from sys import exit
 import random
-import menuHandling as mh
-import jumpAndRunHandling as jar
-import pingPongHandling as pp
+from src import menuHandling as mh
+from src import jumpAndRunHandling as jar
+from src import pingPongHandling as pp
+from src.utils import resource_path
 import pygame.docs
 import time
 
@@ -47,7 +48,7 @@ def main():
     background_rect1 = mh.background_rect
     background_rect2 = background_image.get_rect(center = (1500, 300))
     #Underground
-    underground_image = pygame.transform.scale(pygame.image.load('environment/graphics/Untergrund.png'), 
+    underground_image = pygame.transform.scale(pygame.image.load(resource_path('environment/graphics/Untergrund.png')), 
                                                (1050, 250)).convert_alpha()
     underground_rect1 = underground_image.get_rect(midtop = (500, 500))
     underground_rect2 = underground_image.get_rect(midtop = (1500, 500))
@@ -57,26 +58,32 @@ def main():
                             underground_rect1, underground_rect2]
     
     #Sounds
-    gameOverSound = pygame.mixer.Sound('environment/audios/GameOverSound.mp3')
+    gameOverSound = pygame.mixer.Sound(resource_path('environment/audios/GameOverSound.mp3'))
     gameOverSound.set_volume(0.5)
     
-    gameStartSound = pygame.mixer.Sound('environment/audios/GameStartSound.mp3')
+    gameStartSound = pygame.mixer.Sound(resource_path('environment/audios/GameStartSound.mp3'))
     gameStartSound.set_volume(0.5)
     
-    jumpSound = pygame.mixer.Sound('environment/audios/jumpSound.mp3')
+    jumpSound = pygame.mixer.Sound(resource_path('environment/audios/jumpSound.mp3'))
     jumpSound.set_volume(0.5)
     
-    menuMusik = pygame.mixer.Sound('environment/audios/MenuBackgroundMusik.mp3')
+    menuMusik = pygame.mixer.Sound(resource_path('environment/audios/MenuBackgroundMusik.mp3'))
     menuMusik.set_volume(0.5)
     
-    jarMusik = pygame.mixer.Sound('environment/audios/JumpAndRunBM.mp3')
+    jarMusik = pygame.mixer.Sound(resource_path('environment/audios/JumpAndRunBM.mp3'))
     jarMusik.set_volume(0.5)
     
-    pongBallSound = pygame.mixer.Sound('environment/audios/BallSound.mp3')
+    pongBallSound = pygame.mixer.Sound(resource_path('environment/audios/BallSound.mp3'))
     pongBallSound.set_volume(0.5)
     
-    pongGameBM = pygame.mixer.Sound('environment/audios/PongGameBM.mp3')
+    pongGameBM = pygame.mixer.Sound(resource_path('environment/audios/PongGameBM.mp3'))
     pongGameBM.set_volume(0.5)
+    
+    pongGameWinner = pygame.mixer.Sound(resource_path('environment/audios/PongGameWinner.mp3'))
+    pongGameWinner.set_volume(0.3)
+    
+    pongPointSound = pygame.mixer.Sound(resource_path('environment/audios/PointSound.mp3'))
+    pongPointSound.set_volume(0.6)
     
     #colours 
     LightBlue = (204, 235, 255)
@@ -100,7 +107,16 @@ def main():
     paddle2 = pygame.sprite.GroupSingle()
     paddle2.add(pp.Paddle('player2'))
 
+    #PongBall Coordinate
+    ball_x_pos = 500
+    ball_y_pos = 300
+    ball_x_speed = 5
+    ball_y_speed = 5
     
+    scoreP1 = 0
+    scoreP2 = 0
+    goal = False
+    extraSpeed = 0
     #game loop
     while gameStatus:
         mouse_pos = pygame.mouse.get_pos()
@@ -135,11 +151,14 @@ def main():
                     if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos):
                         menu_state = False
                         PongGame_state = True
+                        PongGame_GameOnState = True
                         menuMusik.stop()
                         gameStartSound.play()
+                        ball_x_speed = random.choice([5, -5])
+                        ball_y_speed = random.choice([5, -5])
                         time.sleep(0.2)
                         pongGameBM.play(15)
-                        screen.fill((0,0,0))
+                        
                     # if mh.defaultVektor_rect_Game3.collidepoint(mouse_pos):
                     #     #doSth
                     # if mh.defaultVektor_rect_Game4.collidepoint(mouse_pos):
@@ -181,7 +200,15 @@ def main():
                         menu_state = True
                         jar.environmentReset(environmentRectList)
                         pongGameBM.stop()
+                        pongGameWinner.stop()
                         menuMusik.play(15)
+                        
+                    if PongGame_GameOnState == False:
+                        if event.key == pygame.K_RETURN:
+                            PongGame_GameOnState = True
+                            pongGameWinner.stop()
+                            pongGameBM.play(15)
+                            
             #specific event Types:
             if jumpAndRun_GameOnState and not speedUp:
                 if event.type == obstacleSpawnTimer and score < firstLevel:
@@ -243,12 +270,47 @@ def main():
                 jarMusik.stop()
         
         if PongGame_state:
-            screen.fill(LightBlue)
-            paddle1.draw(screen)
-            paddle2.draw(screen)
-            paddle1.update()
-            paddle2.update()
+            if PongGame_GameOnState:
+                pp.drawPongScreen(screen, LightBlue, 'Black')
+                topBorder, bottomBorder = pp.drawPongScreen(screen, LightBlue, 'Black')
+                ball = pp.drawBall(screen, ball_x_pos, ball_y_pos)
+                paddle1.draw(screen)
+                paddle2.draw(screen)
+                paddle1.update()
+                paddle2.update()
+                if goal == True: time.sleep(0.4)
+                ball_x_speed, ball_y_speed = pp.ballManagement(ball, 
+                                                paddle1.sprite.rect, paddle2.sprite.rect,
+                                                topBorder, bottomBorder,
+                                                ball_x_speed, ball_y_speed, pongBallSound)
+                
+                extraSpeed = pp.extraSpeed(goal, extraSpeed)
+                if ball_x_speed < 0: ball_x_speed -= extraSpeed
+                if ball_x_speed > 0: ball_x_speed += extraSpeed
+                if ball_y_speed < 0: ball_y_speed -= extraSpeed
+                if ball_y_speed > 0: ball_y_speed += extraSpeed
+                ball_x_pos += ball_x_speed
+                ball_y_pos += ball_y_speed
+                
+                scoreP1, scoreP2, ball_x_pos, ball_y_pos, ball_x_speed, ball_y_speed, goal = pp.goalManagement(ball, 
+                                                                                scoreP1, scoreP2, 
+                                                                                ball_x_pos, ball_y_pos,
+                                                                                paddle1, paddle2,
+                                                                                ball_x_speed, ball_y_speed, 
+                                                                                goal, pongPointSound)
+                
+                pp.drawPongScore(screen, scoreP1, scoreP2)
+                PongGame_GameOnState = pp.checkWin(PongGame_GameOnState, scoreP1, scoreP2)
             
+            if PongGame_GameOnState == False:
+                pongGameBM.stop()
+                pongGameWinner.play(1)
+                pp.pongGameOverScreen(screen, scoreP1, scoreP2)
+                ball_x_pos, ball_y_pos, scoreP1, scoreP2 = pp.resetGame(ball_x_pos, 
+                                                                        ball_y_pos, 
+                                                                        paddle1, paddle2, 
+                                                                        scoreP1, scoreP2)
+                
         #essentials
         clock.tick(80)
         pygame.display.update()

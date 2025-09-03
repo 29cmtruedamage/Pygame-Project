@@ -1,6 +1,6 @@
 import pygame
-from main import screen
-
+from src.main import screen
+from src.utils import resource_path
 pygame.init() 
 #Constants
 LightGrey = (230, 230, 230)
@@ -25,11 +25,11 @@ mainMenuPicGröße = 175
 chooseAgameGröße = 30
 
 #Background initialisieren
-background_image = pygame.transform.scale(pygame.image.load('environment/graphics/BG.png'), (1000, 600)).convert()
+background_image = pygame.transform.scale(pygame.image.load(resource_path('environment/graphics/BG.png')), (1000, 600)).convert()
 background_rect = background_image.get_rect(center = coordinate_backgroundCenter)
 
 #Game-UI Vektors initialisieren
-defaultVektor_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', defaultVektorGröße)
+defaultVektor_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), defaultVektorGröße)
 defaultVektor_text = defaultVektor_font.render("Platzhalter", True, 'Black')
 
 
@@ -40,10 +40,10 @@ defaultVektor_rect_Game3 = defaultVektor_text.get_rect(center = coordinate_vekto
 defaultVektor_rect_Game4 = defaultVektor_text.get_rect(center = coordinate_vektor4)
 # -> screen.blit(Vektor1, defaultVektor_rect_Game1)
 
-vektor_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', vektorGröße)
-vektor_GameText1 = vektor_font.render("Jump and Run", True, 'Black')
-vektor_GameText2 = vektor_font.render(" PingPong ", True, 'Black')
-vektor_GameText3 = vektor_font.render("Special-Game", True, 'Black')
+vektor_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), vektorGröße)
+vektor_GameText1 = vektor_font.render("Jump and Run (SP)", True, 'Black')
+vektor_GameText2 = vektor_font.render(" PingPong (MP)", True, 'Black')
+vektor_GameText3 = vektor_font.render("coming soon...", True, 'Black')
 vektor_GameText4 = vektor_font.render("Tik-Tak-Toe ", True, 'Black')
 
 
@@ -65,11 +65,11 @@ menu_defaultVektorRectList = [defaultVektor_rect_Game1,
                               #defaultVektor_rect_Game4
                               ]
 
-mainMenuPic_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', mainMenuPicGröße)
+mainMenuPic_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), mainMenuPicGröße)
 mainMenuPic_text = mainMenuPic_font.render("Menu", False, Pink)
 mainMenuPic_rect = mainMenuPic_text.get_rect(center = coordinate_mainMenu)
 
-chooseAgame_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', chooseAgameGröße)
+chooseAgame_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), chooseAgameGröße)
 chooseAgame_text = chooseAgame_font.render("choose a game...", True, Pink)
 chooseAgame_rect = chooseAgame_text.get_rect(center = coordinate_chooseAgame)
 
