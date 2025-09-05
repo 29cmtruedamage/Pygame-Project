@@ -43,6 +43,61 @@ class Paddle(pygame.sprite.Sprite):
     def resetPaddles(self):
             self.rect.center = self.paddleRectDefPos 
             
+
+class Ball(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.transform.rotozoom(pygame.image.load(resource_path('environment/obstacles/ball.png')), 0, 0.14)
+        self.rect = self.image.get_rect(center = (500, 300))
+        self.extraSpeed = 1
+        self.x_speed = 3 
+        self.y_speed = 3
+        
+    def ballMovement(self):
+        self.rect.x += self.x_speed * self.extraSpeed
+        self.rect.y += self.y_speed * self.extraSpeed
+        
+    def extraSpeedHandling(self):
+        self.extraSpeed += 0.001
+    def resetBall(self):
+        self.rect.center = (500, 300)
+        self.x_speed = random.choice([3, -3])
+        self.y_speed = random.choice([3, -3])
+        self.extraSpeed = 1
+        
+    def update(self):
+        self.ballMovement()
+        self.extraSpeedHandling()
+    
+def collisionHandling(ball, paddle1, paddle2, topBorder, bottomBorder):
+    def handle_paddle_collision(ball, paddle):
+        if not ball.rect.colliderect(paddle.rect):
+            return
+        dx_left = abs(ball.rect.right - paddle.rect.left)
+        dx_right = abs(ball.rect.left - paddle.rect.right)
+        dy_top = abs(ball.rect.bottom - paddle.rect.top)  
+        dy_bottom = abs(ball.rect.top - paddle.rect.bottom) 
+
+        
+        min_dist = min(dx_left, dx_right, dy_top, dy_bottom)
+
+        if min_dist == dx_left:
+            ball.x_speed = -abs(ball.x_speed)
+        elif min_dist == dx_right:
+            ball.x_speed = abs(ball.x_speed)
+        elif min_dist == dy_top:  
+            ball.y_speed = -abs(ball.y_speed -3)
+        elif min_dist == dy_bottom: 
+            ball.y_speed = abs(ball.y_speed + 3)
+
+    handle_paddle_collision(ball.sprite, paddle1.sprite)
+    handle_paddle_collision(ball.sprite, paddle2.sprite)
+    if ball.sprite.rect.colliderect(topBorder):
+        ball.sprite.y_speed = abs(ball.sprite.y_speed)
+    if ball.sprite.rect.colliderect(bottomBorder):
+        ball.sprite.y_speed = -abs(ball.sprite.y_speed)
+
+            
 def drawPongScreen(screen, BackgroundColour, BorderColour):
     screen.fill(BackgroundColour)
     whichPlay_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 30)
@@ -65,45 +120,37 @@ def drawPongScore(screen, scoreP1, scoreP2):
 #def checkScore(ballSurface)
 def drawBall(screen, x, y):
     tupel = (x, y)
-    ball = pygame.draw.circle(screen, 'Black', tupel, 40)
+    ball = pygame.image.load(resource_path('environment/obstacles/ball.png'))
     return ball
-     
-def ballManagement(ball, paddle1_rect, paddle2_rect, topBorderRect, bottomBorderRect, x_movement, y_movement, sound):
-    if ball.colliderect(paddle1_rect) or ball.colliderect(paddle2_rect):
-        x_movement = -x_movement
-        sound.play()
-    if ball.colliderect(topBorderRect) or ball.colliderect(bottomBorderRect): 
-        y_movement = -y_movement
-        sound.play()
-    return x_movement, y_movement
 
-def resetGame(ball_x_pos, ball_y_pos, paddle1, paddle2, score1, score2):
-    ball_x_pos = 500
-    ball_y_pos = 300
+def resetGamePerPoint(ball, paddle1, paddle2):
+    ball.sprite.resetBall()
+    paddle1.sprite.resetPaddles()
+    paddle2.sprite.resetPaddles()
+
+def resetGameCompletely(ball, paddle1, paddle2, score1, score2):
+    ball.sprite.resetBall()
     paddle1.sprite.resetPaddles()
     paddle2.sprite.resetPaddles()
     score1 = 0
     score2 = 0
-    return ball_x_pos, ball_y_pos, score1, score2
+    return score1, score2
 
-
-def goalManagement(ball, scoreP1, scoreP2, ball_x_pos, ball_y_pos, paddle1, paddle2, ball_x_speed, ball_y_speed, goal: bool, sound):
-    if ball.left <= 50:
-        scoreP1 += 1
+def goalManagament(ball, paddle1, paddle2, sound, score1, score2):
+    scoreMade = False
+    if ball.sprite.rect.left <= 30:
+        score2 += 1
+        scoreMade = True
+    if ball.sprite.rect.right >= 970:
+        score1 += 1
+        scoreMade = True
+    if scoreMade:
         sound.play()
-    if ball.right >= 950:
-        scoreP2 += 1
-        sound.play()
-    if ball.left <= 50 or ball.right >= 950:
-        ball_x_pos = 500
-        ball_y_pos = 300
+        time.sleep(0.2)
+        ball.sprite.resetBall()
         paddle1.sprite.resetPaddles()
         paddle2.sprite.resetPaddles()
-        ball_x_speed = random.choice([5, -5])
-        ball_y_speed = random.choice([5, -5])
-        goal = True
-    else: goal = False
-    return scoreP1, scoreP2, ball_x_pos, ball_y_pos, ball_x_speed, ball_y_speed, goal
+    return score1, score2
 
 
 def checkWin(gameState, score1, score2):
@@ -115,9 +162,9 @@ def checkWin(gameState, score1, score2):
         
 def pongGameOverScreen(screen, score1, score2):
     if score1 == 5:
-        winner = "Player 2"
-    if score2 == 5:
         winner = "Player 1"
+    if score2 == 5:
+        winner = "Player 2"
     if score1 == 5 or score2 == 5:
         screen.fill('Blue')
         winner_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 90)
@@ -130,11 +177,4 @@ def pongGameOverScreen(screen, score1, score2):
         
         screen.blit(winner_text, winner_rect)
         screen.blit(playAgain_text, playAgain_rect)
-        
-def extraSpeed(goal, extraSpeed):
-    if goal == False:
-        extraSpeed += 0.00001
-    if goal == True:
-        extraSpeed = 0
-    return extraSpeed
 

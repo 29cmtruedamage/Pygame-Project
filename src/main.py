@@ -36,7 +36,7 @@ def main():
     obstacleSpawnTimer = pygame.USEREVENT + 1
     pygame.time.set_timer(obstacleSpawnTimer, timeToSpawnObstacle)
     
-    timeToSpawnObstacle_speedUp = 800
+    timeToSpawnObstacle_speedUp = 770
     obstacleSpawnTimer_speedUp = pygame.USEREVENT + 2
     pygame.time.set_timer(obstacleSpawnTimer_speedUp, timeToSpawnObstacle_speedUp)
     
@@ -107,16 +107,21 @@ def main():
     paddle2 = pygame.sprite.GroupSingle()
     paddle2.add(pp.Paddle('player2'))
 
+    ball = pygame.sprite.GroupSingle()
+    ball.add(pp.Ball())
+    
     #PongBall Coordinate
     ball_x_pos = 500
     ball_y_pos = 300
     ball_x_speed = 5
     ball_y_speed = 5
-    
+    ee = 0
     scoreP1 = 0
     scoreP2 = 0
     goal = False
-    extraSpeed = 0
+    extraSpeed = 1
+    # ball_image = pygame.transform.rotozoom(pygame.image.load(resource_path('environment/obstacles/ball.png')), 0, 0.14)
+    # ball = ball_image.get_rect(center = (500, 300))
     #game loop
     while gameStatus:
         mouse_pos = pygame.mouse.get_pos()
@@ -203,10 +208,7 @@ def main():
                         pongGameBM.stop()
                         pongGameWinner.stop()
                         menuMusik.play(15)
-                        ball_x_pos, ball_y_pos, scoreP1, scoreP2 = pp.resetGame(ball_x_pos, 
-                                                                        ball_y_pos, 
-                                                                        paddle1, paddle2, 
-                                                                        scoreP1, scoreP2)
+                        scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
                         
                     if PongGame_GameOnState == False:
                         if event.key == pygame.K_RETURN:
@@ -240,7 +242,7 @@ def main():
         if menu_state:
             #KeyDown event handling
             
-            print("Menu")
+            #print("Menu")
             
             mh.menu_mainMenuPicScreening()
             mh.menu_defaultVektorScreening(mouse_pos)
@@ -276,33 +278,17 @@ def main():
         
         if PongGame_state:
             if PongGame_GameOnState:
-                pp.drawPongScreen(screen, LightBlue, 'Black')
                 topBorder, bottomBorder = pp.drawPongScreen(screen, LightBlue, 'Black')
-                ball = pp.drawBall(screen, ball_x_pos, ball_y_pos)
                 paddle1.draw(screen)
                 paddle2.draw(screen)
                 paddle1.update()
                 paddle2.update()
+                ball.draw(screen)
+                ball.update()
+                
+                pp.collisionHandling(ball=ball, paddle1=paddle1, paddle2=paddle2, topBorder=topBorder, bottomBorder=bottomBorder)
                 if goal == True: time.sleep(0.4)
-                ball_x_speed, ball_y_speed = pp.ballManagement(ball, 
-                                                paddle1.sprite.rect, paddle2.sprite.rect,
-                                                topBorder, bottomBorder,
-                                                ball_x_speed, ball_y_speed, pongBallSound)
-                
-                extraSpeed = pp.extraSpeed(goal, extraSpeed)
-                if ball_x_speed < 0: ball_x_speed -= extraSpeed
-                if ball_x_speed > 0: ball_x_speed += extraSpeed
-                if ball_y_speed < 0: ball_y_speed -= extraSpeed
-                if ball_y_speed > 0: ball_y_speed += extraSpeed
-                ball_x_pos += ball_x_speed
-                ball_y_pos += ball_y_speed
-                
-                scoreP1, scoreP2, ball_x_pos, ball_y_pos, ball_x_speed, ball_y_speed, goal = pp.goalManagement(ball, 
-                                                                                scoreP1, scoreP2, 
-                                                                                ball_x_pos, ball_y_pos,
-                                                                                paddle1, paddle2,
-                                                                                ball_x_speed, ball_y_speed, 
-                                                                                goal, pongPointSound)
+                scoreP1, scoreP2 = pp.goalManagament(ball, paddle1, paddle2, pongPointSound, scoreP1, scoreP2)
                 
                 pp.drawPongScore(screen, scoreP1, scoreP2)
                 PongGame_GameOnState = pp.checkWin(PongGame_GameOnState, scoreP1, scoreP2)
@@ -311,10 +297,7 @@ def main():
                 pongGameBM.stop()
                 pongGameWinner.play(1)
                 pp.pongGameOverScreen(screen, scoreP1, scoreP2)
-                ball_x_pos, ball_y_pos, scoreP1, scoreP2 = pp.resetGame(ball_x_pos, 
-                                                                        ball_y_pos, 
-                                                                        paddle1, paddle2, 
-                                                                        scoreP1, scoreP2)
+                scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
                 
         #essentials
         clock.tick(80)
