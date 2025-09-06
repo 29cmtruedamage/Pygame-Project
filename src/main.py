@@ -236,6 +236,20 @@ def main():
                      
         if startScreenState:
             screen.fill((10,100,200))
+            text_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 110)
+            text2_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 50)
+            
+            sign_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 20)
+            signt_text = sign_font.render("Made by Muhammed Emir Akgül", True, 'White')
+            text_text1 = text_font.render("Welcome to this Game!", True, 'White')
+            text_text2 = text2_font.render("Press anywhere with the mouse to start", True, 'White')
+            text1_rect = text_text1.get_rect(center = (500, 270))
+            text2_rect = text_text2.get_rect(center = (500, 400))
+            sign_rect = signt_text.get_rect(center = (850, 30))
+            screen.blit(text_text1, text1_rect)
+            screen.blit(text_text2, text2_rect)
+            screen.blit(signt_text, sign_rect)
+            
             print("StartSCreen")
                  
         #menu-handling
