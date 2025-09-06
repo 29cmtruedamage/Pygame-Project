@@ -41,8 +41,8 @@ defaultVektor_rect_Game4 = defaultVektor_text.get_rect(center = coordinate_vekto
 # -> screen.blit(Vektor1, defaultVektor_rect_Game1)
 
 vektor_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), vektorGröße)
-vektor_GameText1 = vektor_font.render("Jump and Run (SP)", True, 'Black')
-vektor_GameText2 = vektor_font.render(" PingPong (MP)", True, 'Black')
+vektor_GameText1 = vektor_font.render("Jump and Run (1-P)", True, 'Black')
+vektor_GameText2 = vektor_font.render(" PingPong (2-P)", True, 'Black')
 vektor_GameText3 = vektor_font.render("coming soon...", True, 'Black')
 vektor_GameText4 = vektor_font.render("Tik-Tak-Toe ", True, 'Black')
 
