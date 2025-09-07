@@ -3,7 +3,37 @@ from src.utils import resource_path
 import random
 import time
 pygame.init()
-
+class opponend_Paddle(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        paddleSize = (30, 120)
+        darkBlue = (16, 78, 139)
+        self.image = pygame.Surface((paddleSize))
+        self.image.fill(darkBlue)
+        paddleRect = self.image.get_rect(center = (910, 300)) 
+        self.paddleRectDefPos = paddleRect.center
+        self.rect = paddleRect
+        self.speed = 7
+        
+    def opponend_movementControl(self, ball):
+        upperBorder = 30
+        downBorder = 574
+        borderWhenToStop = 450
+        ball_y = ball.sprite.rect.center[1]
+        ball_x = ball.sprite.rect.center[0]
+        self_y = self.rect.center[1]
+        
+        if ball_y >= self_y and self.rect.bottom <= downBorder and ball_x > borderWhenToStop: 
+            self.rect.y += self.speed
+        if ball_y <= self.rect.center[1] and self.rect.top >= upperBorder and borderWhenToStop: 
+            self.rect.y -= self.speed
+    
+    def update(self, ball):
+        self.opponend_movementControl(ball)
+            
+    def opponend_resetPaddles(self):
+            self.rect.center = self.paddleRectDefPos 
+            
 class Paddle(pygame.sprite.Sprite):
     def __init__(self, paddleType: str):
         super().__init__()
@@ -32,9 +62,11 @@ class Paddle(pygame.sprite.Sprite):
         
     def movementControl(self):
         keys = pygame.key.get_pressed()
-        if keys[self.UP] and self.rect.top >= 30:
+        upperBorder = 30
+        downBorder = 574
+        if keys[self.UP] and self.rect.top >= upperBorder:
             self.rect.y -= self.speed
-        if keys[self.DOWN] and self.rect.bottom <= 574:
+        if keys[self.DOWN] and self.rect.bottom <= downBorder:
             self.rect.y += self.speed
     
     def update(self):
@@ -98,11 +130,13 @@ def collisionHandling(ball, paddle1, paddle2, topBorder, bottomBorder):
         ball.sprite.y_speed = -abs(ball.sprite.y_speed)
 
             
-def drawPongScreen(screen, BackgroundColour, BorderColour):
+def drawPongScreen(screen, BackgroundColour, BorderColour, gameMode):
+    
     screen.fill(BackgroundColour)
     whichPlay_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 30)
     whichPlay_p1 = whichPlay_font.render("Player 1", True, 'Black')
-    whichPlay_p2 = whichPlay_font.render("Player 2", True, 'Black')
+    if gameMode == '2p': whichPlay_p2 = whichPlay_font.render("Player 2", True, 'Black') 
+    else: whichPlay_p2 = whichPlay_font.render("Computer", True, 'Black')
     whichPlay_p1_rect = whichPlay_p1.get_rect(center = (100, 40))
     whichPlay_p2_rect = whichPlay_p2.get_rect(center = (900, 40))
     screen.blit(whichPlay_p1, whichPlay_p1_rect)
@@ -160,11 +194,12 @@ def checkWin(gameState, score1, score2):
     return gameState
         
         
-def pongGameOverScreen(screen, score1, score2):
+def pongGameOverScreen(screen, score1, score2, gameMode):
     if score1 == 5:
         winner = "Player 1"
     if score2 == 5:
-        winner = "Player 2"
+        if gameMode == '2p': winner = "Player 2"
+        else: winner = "Computer"
     if score1 == 5 or score2 == 5:
         screen.fill('Blue')
         winner_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 90)
@@ -178,3 +213,36 @@ def pongGameOverScreen(screen, score1, score2):
         screen.blit(winner_text, winner_rect)
         screen.blit(playAgain_text, playAgain_rect)
 
+
+
+def PingPongTutorialScreen(screen, gameMode):
+    if gameMode == '1p':
+        WASD_center = (500, 400)
+    else: WASD_center = (250, 400)
+    
+    
+    Pfeil_center = (750, 400)
+    WASD = pygame.transform.rotozoom(pygame.image.load(resource_path('environment/graphics/WASD-Tasten.jpeg')), 0, 0.7)
+    Pfeiltasten = pygame.transform.rotozoom(pygame.image.load(resource_path('environment/graphics/Pfeiltasten-Tasten.jpeg')), 0, 0.7)
+    WASD_rect = WASD.get_rect(center = WASD_center)
+    Pfeiltasten_rect = Pfeiltasten.get_rect(center = Pfeil_center)
+    
+    text_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 50)
+    pressToContinue = text_font.render("Press anywhere with mouse to Play", True, 'Black')
+    player1_text = text_font.render("Player 1 controls with:", True, 'Black')
+    player2_text = text_font.render("Player 2 controls with:", True, 'Black')
+    
+    pressToContinue_rect = pressToContinue.get_rect(center = (500, 40))
+    player1_rect = player1_text.get_rect(center = (WASD_center[0], WASD_center[1] - 170))
+    player2_rect = player1_text.get_rect(center = (Pfeil_center[0], Pfeil_center[1]- 170))
+    
+    
+    screen.fill('White')
+    screen.blit(pressToContinue, pressToContinue_rect)
+    screen.blit(WASD, WASD_rect)
+    screen.blit(player1_text, player1_rect)
+    
+    if gameMode == '2p':
+        screen.blit(Pfeiltasten, Pfeiltasten_rect)
+        screen.blit(player2_text, player2_rect)
+        pygame.draw.line(screen, 'Black', (500, 100), (500, 600))
