@@ -28,9 +28,13 @@ def main():
     jumpAndRun_GameOnState = False
     speedUp = False
     
-    PongGame_state = False
-    PongGame_GameOnState = False
+    PongGame2p_state = False
+    PongGame2p_GameOnState = False
+    PongGame2p_Tutorial_Screen = False
     
+    PongGame1p_state = False
+    PongGame1p_GameOnState = False
+    PongGame1p_Tutorial_Screen = False
     #new Self-defined USEREVENTS
     timeToSpawnObstacle = 2000
     obstacleSpawnTimer = pygame.USEREVENT + 1
@@ -107,19 +111,15 @@ def main():
     paddle2 = pygame.sprite.GroupSingle()
     paddle2.add(pp.Paddle('player2'))
 
+    opponendPaddle = pygame.sprite.GroupSingle()
+    opponendPaddle.add(pp.opponend_Paddle())
     ball = pygame.sprite.GroupSingle()
     ball.add(pp.Ball())
     
     #PongBall Coordinate
-    ball_x_pos = 500
-    ball_y_pos = 300
-    ball_x_speed = 5
-    ball_y_speed = 5
-    ee = 0
     scoreP1 = 0
     scoreP2 = 0
     goal = False
-    extraSpeed = 1
     # ball_image = pygame.transform.rotozoom(pygame.image.load(resource_path('environment/obstacles/ball.png')), 0, 0.14)
     # ball = ball_image.get_rect(center = (500, 300))
     #game loop
@@ -153,22 +153,37 @@ def main():
                         startTime = pygame.time.get_ticks()
                         obstacle_group.empty()
                     #For next Games
-                    if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos):
+                    if mh.defaultVektor_rect_Game4.collidepoint(mouse_pos): #PingPong 2-PL
                         menu_state = False
-                        PongGame_state = True
-                        PongGame_GameOnState = True
-                        menuMusik.stop()
-                        gameStartSound.play()
-                        ball_x_speed = random.choice([5, -5])
-                        ball_y_speed = random.choice([5, -5])
-                        time.sleep(0.2)
-                        pongGameBM.play(15)
+                        PongGame2p_Tutorial_Screen = True
+                        pp.PingPongTutorialScreen(screen, '2p')
                         
-                    # if mh.defaultVektor_rect_Game3.collidepoint(mouse_pos):
-                    #     #doSth
+                        
+                    if mh.defaultVektor_rect_Game3.collidepoint(mouse_pos): #PingPong 1-Pl
+                        menu_state = False
+                        PongGame1p_Tutorial_Screen = True
+                        pp.PingPongTutorialScreen(screen, '1p')
                     # if mh.defaultVektor_rect_Game4.collidepoint(mouse_pos):
-                    #     #doSth
+                    #     #doSth    
                     
+                elif PongGame2p_Tutorial_Screen:
+                    PongGame2p_Tutorial_Screen = False
+                    PongGame2p_state = True
+                    PongGame2p_GameOnState = True
+                    menuMusik.stop()
+                    gameStartSound.play()
+                    time.sleep(0.2)
+                    pongGameBM.play(15)      
+                        
+                elif PongGame1p_Tutorial_Screen: 
+                    PongGame1p_Tutorial_Screen = False
+                    PongGame1p_state = True
+                    PongGame1p_GameOnState = True
+                    
+                    menuMusik.stop()
+                    gameStartSound.play()
+                    time.sleep(0.2)
+                    pongGameBM.play(15)  
             
 
             
@@ -198,10 +213,26 @@ def main():
                             jumpAndRun_GameOnState = True     
                             startTime = pygame.time.get_ticks()
                             jarMusik.play(15)
-                            
-                elif PongGame_state:
+                elif PongGame1p_state:
                     if event.key == pygame.K_ESCAPE:
-                        PongGame_state = False
+                        PongGame1p_state = False
+                        menu_state = True
+                        jar.environmentReset(environmentRectList)
+                        
+                        pongGameBM.stop()
+                        pongGameWinner.stop()
+                        menuMusik.play(15)
+                        scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
+                    
+                    if PongGame1p_GameOnState == False:
+                        if event.key == pygame.K_RETURN:
+                            PongGame1p_GameOnState = True
+                            pongGameWinner.stop()
+                            pongGameBM.play(15)
+                            
+                elif PongGame2p_state:
+                    if event.key == pygame.K_ESCAPE:
+                        PongGame2p_state = False
                         menu_state = True
                         jar.environmentReset(environmentRectList)
                         
@@ -210,9 +241,9 @@ def main():
                         menuMusik.play(15)
                         scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
                         
-                    if PongGame_GameOnState == False:
+                    if PongGame2p_GameOnState == False:
                         if event.key == pygame.K_RETURN:
-                            PongGame_GameOnState = True
+                            PongGame2p_GameOnState = True
                             pongGameWinner.stop()
                             pongGameBM.play(15)
                             
@@ -290,9 +321,32 @@ def main():
                 print("Game Over")
                 jarMusik.stop()
         
-        if PongGame_state:
-            if PongGame_GameOnState:
-                topBorder, bottomBorder = pp.drawPongScreen(screen, LightBlue, 'Black')
+        
+        if PongGame1p_state:
+            if PongGame1p_GameOnState:
+                topBorder, bottomBorder = pp.drawPongScreen(screen, LightBlue, 'Black', gameMode='1p')
+                paddle1.draw(screen)
+                opponendPaddle.draw(screen)
+                paddle1.update()
+                opponendPaddle.update(ball)
+                ball.draw(screen)
+                ball.update()
+                pp.collisionHandling(ball=ball, paddle1=paddle1, paddle2=opponendPaddle, topBorder=topBorder, bottomBorder=bottomBorder)
+                if goal == True: time.sleep(0.4)
+                scoreP1, scoreP2 = pp.goalManagament(ball, paddle1, paddle2, pongPointSound, scoreP1, scoreP2)
+                
+                pp.drawPongScore(screen, scoreP1, scoreP2)
+                PongGame1p_GameOnState = pp.checkWin(PongGame1p_GameOnState, scoreP1, scoreP2)
+            
+            if PongGame1p_GameOnState == False:
+                pongGameBM.stop()
+                pongGameWinner.play(1)
+                pp.pongGameOverScreen(screen, scoreP1, scoreP2, gameMode='1p')
+                scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
+                
+        if PongGame2p_state:
+            if PongGame2p_GameOnState:
+                topBorder, bottomBorder = pp.drawPongScreen(screen, LightBlue, 'Black', gameMode='2p')
                 paddle1.draw(screen)
                 paddle2.draw(screen)
                 paddle1.update()
@@ -305,12 +359,12 @@ def main():
                 scoreP1, scoreP2 = pp.goalManagament(ball, paddle1, paddle2, pongPointSound, scoreP1, scoreP2)
                 
                 pp.drawPongScore(screen, scoreP1, scoreP2)
-                PongGame_GameOnState = pp.checkWin(PongGame_GameOnState, scoreP1, scoreP2)
+                PongGame2p_GameOnState = pp.checkWin(PongGame2p_GameOnState, scoreP1, scoreP2)
             
-            if PongGame_GameOnState == False:
+            if PongGame2p_GameOnState == False:
                 pongGameBM.stop()
                 pongGameWinner.play(1)
-                pp.pongGameOverScreen(screen, scoreP1, scoreP2)
+                pp.pongGameOverScreen(screen, scoreP1, scoreP2, gameMode='2p')
                 scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
                 
         #essentials
