@@ -9,16 +9,16 @@ Pink = (233, 128, 128)
 Blue = (10, 100, 200)
 
 #nebeneinander Vektoren
-coordinate_vektor1 = (280, 300)
-coordinate_vektor2 = (280, 450)
-coordinate_vektor3 = (720, 300)
-coordinate_vektor4 = (720, 450)
+# coordinate_vektor1 = (280, 300)
+# coordinate_vektor2 = (280, 450)
+# coordinate_vektor3 = (720, 300)
+# coordinate_vektor4 = (720, 450)
 
 #untereinander Vektoren
-# coordinate_vektor1 = (500, 280)
-# coordinate_vektor2 = (500, 380)
-# coordinate_vektor3 = (500, 480)
-# coordinate_vektor4 = (720, 450)
+coordinate_vektor1 = (500, 280)
+coordinate_vektor2 = (500, 380)
+coordinate_vektor3 = (500, 480)
+coordinate_vektor4 = (720, 450)
 coordinate_mainMenu = (500, 100)
 coordinate_chooseAgame = (500, 200)
 coordinate_backgroundCenter = (500, 300)
@@ -45,10 +45,9 @@ defaultVektor_rect_Game4 = defaultVektor_text.get_rect(center = coordinate_vekto
 
 vektor_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), vektorGröße)
 vektor_GameText1 = vektor_font.render("Jump and Run(1-Pl)", True, 'Black')
-vektor_GameText2 = vektor_font.render("coming soon...", True, 'Black')
-vektor_GameText3 = vektor_font.render("  PingPong(1-Pl)  ", True, 'Black')
-vektor_GameText4 = vektor_font.render("  PingPong(2-Pl)  ", True, 'Black')
-
+vektor_GameText2 = vektor_font.render("    PingPong    ", True, 'Black')
+vektor_GameText3 = vektor_font.render(" coming soon... ", True, 'Black')
+vektor_GameText4 = vektor_font.render(" Für zukünftige Games", True, 'Black')
 
 vektor_rect1 = vektor_GameText1.get_rect(center = coordinate_vektor1)
 vektor_rect2 = vektor_GameText2.get_rect(center = coordinate_vektor2)
@@ -59,13 +58,13 @@ menu_vektorMap = {
     vektor_GameText1: vektor_rect1,
     vektor_GameText2: vektor_rect2,
     vektor_GameText3: vektor_rect3,
-    vektor_GameText4: vektor_rect4
+    #vektor_GameText4: vektor_rect4
 }
 
 menu_defaultVektorRectList = [defaultVektor_rect_Game1, 
                               defaultVektor_rect_Game2, 
                               defaultVektor_rect_Game3, 
-                              defaultVektor_rect_Game4
+                              #defaultVektor_rect_Game4
                               ]
 
 mainMenuPic_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), mainMenuPicGröße)

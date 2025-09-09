@@ -28,6 +28,8 @@ def main():
     jumpAndRun_GameOnState = False
     speedUp = False
     
+    PongGameChooseGameMode_state = False
+    
     PongGame2p_state = False
     PongGame2p_GameOnState = False
     PongGame2p_Tutorial_Screen = False
@@ -99,12 +101,12 @@ def main():
     highScore = 0
     score = 0
     #DECLARING OBJECTS
-    #declaring player and obstacles
+    #declaring player and obstacles -Jump and Run
     player = pygame.sprite.GroupSingle()
     player.add(jar.Player())
     
     obstacle_group = pygame.sprite.Group()
-    #declaring paddles
+    #declaring paddles -PingPong
     paddle1 = pygame.sprite.GroupSingle()
     paddle1.add(pp.Paddle('player1'))
 
@@ -120,8 +122,7 @@ def main():
     scoreP1 = 0
     scoreP2 = 0
     goal = False
-    # ball_image = pygame.transform.rotozoom(pygame.image.load(resource_path('environment/obstacles/ball.png')), 0, 0.14)
-    # ball = ball_image.get_rect(center = (500, 300))
+        
     #game loop
     while gameStatus:
         mouse_pos = pygame.mouse.get_pos()
@@ -153,23 +154,31 @@ def main():
                         startTime = pygame.time.get_ticks()
                         obstacle_group.empty()
                     #For next Games
-                    if mh.defaultVektor_rect_Game4.collidepoint(mouse_pos): #PingPong 2-PL
+                    if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos): #PingPong 1-PL
                         menu_state = False
-                        PongGame2p_Tutorial_Screen = True
-                        pp.PingPongTutorialScreen(screen, '2p')
-                        
-                        
-                    if mh.defaultVektor_rect_Game3.collidepoint(mouse_pos): #PingPong 1-Pl
-                        menu_state = False
-                        PongGame1p_Tutorial_Screen = True
-                        pp.PingPongTutorialScreen(screen, '1p')
+                        PongGameChooseGameMode_state = True
+                        pp.chooseGamemodeScreen(screen, mouse_pos)
+                    
+                    #Template
+                    # if mh.defaultVektor_rect_Game3.collidepoint(mouse_pos): 
+                        # do sth
                     # if mh.defaultVektor_rect_Game4.collidepoint(mouse_pos):
                     #     #doSth    
+                    
+                #PongGame
+                elif PongGameChooseGameMode_state:
+                    PongGameChooseGameMode_state, PongGame1p_Tutorial_Screen, PongGame2p_Tutorial_Screen = pp.chooseGamemodeCollisionHandling(
+                                                                                                                screen,
+                                                                                                                mouse_pos,
+                                                                                                                PongGameChooseGameMode_state,
+                                                                                                                PongGame1p_Tutorial_Screen,
+                                                                                                                PongGame2p_Tutorial_Screen) 
                     
                 elif PongGame2p_Tutorial_Screen:
                     PongGame2p_Tutorial_Screen = False
                     PongGame2p_state = True
                     PongGame2p_GameOnState = True
+                    
                     menuMusik.stop()
                     gameStartSound.play()
                     time.sleep(0.2)
@@ -213,6 +222,12 @@ def main():
                             jumpAndRun_GameOnState = True     
                             startTime = pygame.time.get_ticks()
                             jarMusik.play(15)
+                            
+                elif PongGameChooseGameMode_state:
+                    if event.key == pygame.K_ESCAPE:
+                        PongGameChooseGameMode_state = False
+                        menu_state = True
+                        
                 elif PongGame1p_state:
                     if event.key == pygame.K_ESCAPE:
                         PongGame1p_state = False
@@ -321,7 +336,10 @@ def main():
                 print("Game Over")
                 jarMusik.stop()
         
-        
+        #Pong Game Handling
+        if PongGameChooseGameMode_state:
+            pp.chooseGamemodeScreen(screen, mouse_pos)
+            
         if PongGame1p_state:
             if PongGame1p_GameOnState:
                 topBorder, bottomBorder = pp.drawPongScreen(screen, LightBlue, 'Black', gameMode='1p')

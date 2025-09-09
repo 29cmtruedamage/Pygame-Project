@@ -2,6 +2,7 @@ import pygame
 from src.utils import resource_path
 import random
 import time
+from enum import Enum
 pygame.init()
 class opponend_Paddle(pygame.sprite.Sprite):
     def __init__(self):
@@ -213,13 +214,66 @@ def pongGameOverScreen(screen, score1, score2, gameMode):
         screen.blit(winner_text, winner_rect)
         screen.blit(playAgain_text, playAgain_rect)
 
+vektorGröße = 60
+vektor1center = (300, 350)
+vektor2center = (700, 350)
+LightGrey = (230, 230, 230)
+DarkGrey =  (130, 130, 130)
+# Defaultvektor_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 70)
+# DefVek_text = Defaultvektor_font.render("  Platzhalter  ", False, 'Black')
+vektor_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), vektorGröße)
+vektor_GameText1 = vektor_font.render("    1-Player    ", True, 'Black')
+vektor_GameText2 = vektor_font.render("    2-Players   ", True, 'Black')
+Vektor_rect_Game1 = vektor_GameText1.get_rect(center = vektor1center)
+Vektor_rect_Game2 = vektor_GameText2.get_rect(center = vektor2center)
+VektorRectList = [Vektor_rect_Game1, Vektor_rect_Game2]
+
+chooseGame_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), int(vektorGröße * 1.2))
+chooseGame_text = chooseGame_font.render("choose a Game-mode", True, 'Black')
+chooseGame_rect = chooseGame_text.get_rect(center = (500, 80))
 
 
+returnMenu_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), vektorGröße)
+returnMenu_text = returnMenu_font.render("Press ESC to return back to menu", True, 'Black')
+returnMenu_rect = returnMenu_text.get_rect(center = (500, 180))
+def chooseGamemodeScreen(screen, mouse_pos):
+    def menu_defaultVektorScreening(screen, mouse_pos): #helper function
+        for vektor in VektorRectList:
+            if vektor.collidepoint(mouse_pos):
+                pygame.draw.rect(screen, DarkGrey, vektor, 0, 50)
+            else:
+                pygame.draw.rect(screen, LightGrey, vektor, 0, 50)
+    
+    screen.fill('White')
+    screen.blit(chooseGame_text, chooseGame_rect)
+    screen.blit(returnMenu_text, returnMenu_rect)
+    
+    menu_defaultVektorScreening(screen, mouse_pos)
+    screen.blit(vektor_GameText1, Vektor_rect_Game1)
+    screen.blit(vektor_GameText2, Vektor_rect_Game2)
+ 
+ 
+###   
+class gameMode(Enum):
+    one_player = 1
+    two_players = 2
+    
+def chooseGamemodeCollisionHandling(screen, mouse_pos, ChooseGameScreenState: bool, gameMode1: bool, gameMode2: bool):
+    if Vektor_rect_Game1.collidepoint(mouse_pos):
+        gameMode1 = True
+        ChooseGameScreenState = False
+        PingPongTutorialScreen(screen, gameMode.one_player.value)
+    elif Vektor_rect_Game2.collidepoint(mouse_pos):
+        ChooseGameScreenState = False
+        gameMode2 = True
+        PingPongTutorialScreen(screen, gameMode.two_players.value)
+    return ChooseGameScreenState, gameMode1, gameMode2
+    
+    
 def PingPongTutorialScreen(screen, gameMode):
-    if gameMode == '1p':
+    if gameMode == 1:
         WASD_center = (500, 400)
     else: WASD_center = (250, 400)
-    
     
     Pfeil_center = (750, 400)
     WASD = pygame.transform.rotozoom(pygame.image.load(resource_path('environment/graphics/WASD-Tasten.jpeg')), 0, 0.7)
@@ -228,7 +282,7 @@ def PingPongTutorialScreen(screen, gameMode):
     Pfeiltasten_rect = Pfeiltasten.get_rect(center = Pfeil_center)
     
     text_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 50)
-    pressToContinue = text_font.render("Press anywhere with mouse to Play", True, 'Black')
+    pressToContinue = text_font.render("Press anywhere with mouse to start", True, 'Black')
     player1_text = text_font.render("Player 1 controls with:", True, 'Black')
     player2_text = text_font.render("Player 2 controls with:", True, 'Black')
     
@@ -242,7 +296,7 @@ def PingPongTutorialScreen(screen, gameMode):
     screen.blit(WASD, WASD_rect)
     screen.blit(player1_text, player1_rect)
     
-    if gameMode == '2p':
+    if gameMode == 2:
         screen.blit(Pfeiltasten, Pfeiltasten_rect)
         screen.blit(player2_text, player2_rect)
         pygame.draw.line(screen, 'Black', (500, 100), (500, 600))
