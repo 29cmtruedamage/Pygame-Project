@@ -26,7 +26,7 @@ class opponend_Paddle(pygame.sprite.Sprite):
         
         if ball_y >= self_y and self.rect.bottom <= downBorder and ball_x > borderWhenToStop: 
             self.rect.y += self.speed
-        if ball_y <= self.rect.center[1] and self.rect.top >= upperBorder and borderWhenToStop: 
+        if ball_y <= self.rect.center[1] and self.rect.top >= upperBorder and ball_x > borderWhenToStop: 
             self.rect.y -= self.speed
     
     def update(self, ball):
@@ -82,27 +82,27 @@ class Ball(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.transform.rotozoom(pygame.image.load(resource_path('environment/obstacles/ball.png')), 0, 0.14)
         self.rect = self.image.get_rect(center = (500, 300))
-        self.extraSpeed = 1
-        self.x_speed = 3 
-        self.y_speed = 3
+        
+        self.x_speed = 4
+        self.y_speed = 4
         
     def ballMovement(self):
-        self.rect.x += self.x_speed * self.extraSpeed
-        self.rect.y += self.y_speed * self.extraSpeed
+        self.rect.x += self.x_speed 
+        self.rect.y += self.y_speed 
         
-    def extraSpeedHandling(self):
-        self.extraSpeed += 0.001
     def resetBall(self):
         self.rect.center = (500, 300)
-        self.x_speed = random.choice([3, -3])
-        self.y_speed = random.choice([3, -3])
-        self.extraSpeed = 1
+        self.x_speed = random.choice([4, -4])
+        self.y_speed = random.choice([4, -4])
+        
         
     def update(self):
         self.ballMovement()
-        self.extraSpeedHandling()
-    
+        
+        
 def collisionHandling(ball, paddle1, paddle2, topBorder, bottomBorder):
+    x_speed_increase = 1.05 
+    y_speed_increase = 1.025
     def handle_paddle_collision(ball, paddle):
         if not ball.rect.colliderect(paddle.rect):
             return
@@ -115,9 +115,9 @@ def collisionHandling(ball, paddle1, paddle2, topBorder, bottomBorder):
         min_dist = min(dx_left, dx_right, dy_top, dy_bottom)
 
         if min_dist == dx_left:
-            ball.x_speed = -abs(ball.x_speed)
+            ball.x_speed = -abs(ball.x_speed * x_speed_increase)
         elif min_dist == dx_right:
-            ball.x_speed = abs(ball.x_speed)
+            ball.x_speed = abs(ball.x_speed * x_speed_increase)
         elif min_dist == dy_top:  
             ball.y_speed = -abs(ball.y_speed -3)
         elif min_dist == dy_bottom: 
@@ -126,10 +126,12 @@ def collisionHandling(ball, paddle1, paddle2, topBorder, bottomBorder):
     handle_paddle_collision(ball.sprite, paddle1.sprite)
     handle_paddle_collision(ball.sprite, paddle2.sprite)
     if ball.sprite.rect.colliderect(topBorder):
-        ball.sprite.y_speed = abs(ball.sprite.y_speed)
+        ball.sprite.y_speed = abs(ball.sprite.y_speed * y_speed_increase)
+        
+        
     if ball.sprite.rect.colliderect(bottomBorder):
-        ball.sprite.y_speed = -abs(ball.sprite.y_speed)
-
+        ball.sprite.y_speed = -abs(ball.sprite.y_speed * y_speed_increase)
+        
             
 def drawPongScreen(screen, BackgroundColour, BorderColour, gameMode):
     

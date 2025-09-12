@@ -196,8 +196,8 @@ def collisionCheck(player, obstacle_group, gameOverSound):
     for obstacle_rect in obstacle_group:
         if player.sprite.hitbox.colliderect(obstacle_rect.rect):
             gameOverSound.play()
-            return False
-    return True
+            return False, True
+    return True, False
 
 gameOverScreen_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 200)
 gameOverPressEnter_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 50)
