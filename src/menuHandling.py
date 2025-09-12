@@ -84,20 +84,35 @@ chooseAgame_rect = chooseAgame_text.get_rect(center = coordinate_chooseAgame)
 #         else:
 #             pygame.draw.rect(screen, LightGrey, vektor, 0, 50)
             
-def menu_defaultVektorScreening(mouse_pos):
+def menu_defaultVektorScreening(mouse_pos, DefVekList):
     global screen
-    for vektor in menu_defaultVektorRectList:
-        if vektor.collidepoint(mouse_pos):
-            pygame.draw.rect(screen, DarkGrey, vektor, 0, 50)
+    for DefVektor in DefVekList:
+        if DefVektor.collidepoint(mouse_pos):
+            pygame.draw.rect(screen, DarkGrey, DefVektor, 0, 50)
         else:
-            pygame.draw.rect(screen, LightGrey, vektor, 0, 50)
+            pygame.draw.rect(screen, LightGrey, DefVektor, 0, 50)
         
-def menu_vektorScreening():
-    for key in menu_vektorMap:
-        screen.blit(key, menu_vektorMap[key])
+def menu_vektorScreening(vektorMap):
+    for key in vektorMap:
+        screen.blit(key, vektorMap[key])
 
 def menu_mainMenuPicScreening():
     screen.blit(background_image, background_rect)
     screen.blit(mainMenuPic_text, mainMenuPic_rect)
     screen.blit(chooseAgame_text, chooseAgame_rect)
     
+
+pause_DefVektor_rect1 = defaultVektor_rect_Game1
+pause_DefVektor_rect2 = defaultVektor_rect_Game2
+pause_vektorText_resume = vektor_font.render("             Resume", True, 'Black')
+pause_vektorText_return = vektor_font.render("Back to menu", True, 'Black')
+
+pause_vektor_map = {
+    pause_vektorText_resume: vektor_rect1,
+    pause_vektorText_return: vektor_rect2
+ }
+pause_DefVektorList = [pause_DefVektor_rect1, pause_DefVektor_rect2]
+def pauseScreen(mouse_pos, DefVekList, vektorMap):
+    screen.blit(pause_text, pause_rect)
+    menu_defaultVektorScreening(mouse_pos, DefVekList)
+    menu_vektorScreening(vektorMap)
