@@ -113,6 +113,5 @@ pause_vektor_map = {
  }
 pause_DefVektorList = [pause_DefVektor_rect1, pause_DefVektor_rect2]
 def pauseScreen(mouse_pos, DefVekList, vektorMap):
-    screen.blit(pause_text, pause_rect)
     menu_defaultVektorScreening(mouse_pos, DefVekList)
     menu_vektorScreening(vektorMap)
