@@ -106,6 +106,20 @@ pause_vektor_map = {
     pause_vektorText_return: vektor_rect2
  }
 pause_DefVektorList = [pause_DefVektor_rect1, pause_DefVektor_rect2]
+
 def pauseScreen(mouse_pos, DefVekList, vektorMap):
     menu_defaultVektorScreening(mouse_pos, DefVekList)
     menu_vektorScreening(vektorMap)
+    
+def pauseResumeHandling(state, mouse_pos, pause_state, GameStatesList: list):
+    pause_state = True
+    for i in range (0, len(GameStatesList) - 1, 2):
+        gameState = getattr(state, GameStatesList[i])
+        gameOnState = getattr(state, GameStatesList[i + 1])
+        #checks if user presses on resume-button
+        if pause_DefVektor_rect1.collidepoint(mouse_pos) and gameState==True and gameOnState==False:
+            pause_state = False
+            setattr(state, GameStatesList[i + 1], True)
+            return pause_state, GameStatesList
+    return pause_state, GameStatesList
+    

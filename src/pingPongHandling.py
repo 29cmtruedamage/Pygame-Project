@@ -190,11 +190,11 @@ def goalManagament(ball, paddle1, paddle2, sound, score1, score2):
     return score1, score2
 
 
-def checkWin(gameState, score1, score2):
-    gameState = True
+def checkWin(gameOverState, score1, score2):
+    gameOverState = False
     if score1 == 5 or score2 == 5:
-        gameState = False
-    return gameState
+        gameOverState = True
+    return gameOverState
         
         
 def pongGameOverScreen(screen, score1, score2, gameMode):

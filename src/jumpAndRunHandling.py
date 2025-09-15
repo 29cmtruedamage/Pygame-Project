@@ -204,8 +204,9 @@ gameOverPressEnter_font = pygame.font.Font(resource_path('environment/textStyles
 gameOverCenter = (500, 200)
 gameOverPressEnterCenter = (500, 400)
 returnBackMenuCenter = (500, 460)
+showScore_center = (500, 340)
 
-def gameOverScreen(screen):
+def gameOverScreen(screen, score):
     gameOverScreen_text = gameOverScreen_font.render("GAME OVER", False, colourBeige)
     gameOverScreen_rect = gameOverScreen_text.get_rect(center = gameOverCenter)
     
@@ -214,8 +215,12 @@ def gameOverScreen(screen):
     
     returnBackMenu_text = gameOverPressEnter_font.render("PRESS ESC TO RETURN TO MENU", True, colourBeige)
     returnBackMenu_rect = returnBackMenu_text.get_rect(center = returnBackMenuCenter)
+    
+    showScore_text = gameOverPressEnter_font.render(f"You got {score} points", True, colourBeige)
+    showScore_rect = showScore_text.get_rect(center = showScore_center)
     screen.fill(colourGreen)
     
+    screen.blit(showScore_text, showScore_rect)
     screen.blit(gameOverScreen_text, gameOverScreen_rect)
     screen.blit(gameOverPressEnter_text, gameOverPressEnter_rect)
     screen.blit(returnBackMenu_text, returnBackMenu_rect)
