@@ -95,6 +95,7 @@ def menu_mainMenuPicScreening():
     screen.blit(mainMenuPic_text, mainMenuPic_rect)
     screen.blit(chooseAgame_text, chooseAgame_rect)
     
+#PAUSE HANDLING SOURCECODE
 
 pause_DefVektor_rect1 = defaultVektor_rect_Game1
 pause_DefVektor_rect2 = defaultVektor_rect_Game2
@@ -113,7 +114,7 @@ def pauseScreen(mouse_pos, DefVekList, vektorMap):
     
 def pauseResumeHandling(state, mouse_pos, pause_state, GameStatesList: list):
     pause_state = True
-    for i in range (0, len(GameStatesList) - 1, 2):
+    for i in range (0, len(GameStatesList) - 2, 3):
         gameState = getattr(state, GameStatesList[i])
         gameOnState = getattr(state, GameStatesList[i + 1])
         #checks if user presses on resume-button
@@ -123,3 +124,16 @@ def pauseResumeHandling(state, mouse_pos, pause_state, GameStatesList: list):
             return pause_state, GameStatesList
     return pause_state, GameStatesList
     
+def pauseBacktomenuHandling(state, mouse_pos, pause_state, GameStatesList: list):
+    pause_state = True
+    menu_state = False
+    for i in range (0, len(GameStatesList) - 2, 3):
+        gameState = getattr(state, GameStatesList[i])
+        gameOnState = getattr(state, GameStatesList[i + 1])
+        #checks if user presses on resume-button
+        if pause_DefVektor_rect2.collidepoint(mouse_pos) and gameState==True and gameOnState==False:
+            pause_state = False
+            setattr(state, GameStatesList[i], False)
+            menu_state = True
+            return pause_state, GameStatesList, menu_state
+    return pause_state, GameStatesList, menu_state
