@@ -17,28 +17,41 @@ pygame.display.set_caption("Multigame World")
 clock = pygame.time.Clock()
 gameStatus = True
 
+class GameStates():
+    def __init__(self):
+        self.startScreenState = True
+        self.menu_state = False 
+        self.pause_state = False
+        
+        self.jumpAndRun_state = False
+        self.jumpAndRun_GameOnState = False
+        self.jumpAndRun_GameOverState = False
+        #self.speedUp = False
+        
+        self.PongGameChooseGameMode_state = False
+        
+        self.PongGame1p_state = False
+        self.PongGame1p_GameOnState = False
+        self.PongGame1p_GameOverState = False
+        self.PongGame1p_Tutorial_Screen = False
+        
+        self.PongGame2p_state = False
+        self.PongGame2p_GameOnState = False
+        self.PongGame2p_GameOverState = False
+        self.PongGame2p_Tutorial_Screen = False
+        
+        
+        
+        self.GameStatesList = ["jumpAndRun_state", "jumpAndRun_GameOnState", "jumpAndRun_GameOverState",
+                               "PongGame1p_state", "PongGame1p_GameOnState", "PongGame1p_GameOverState",
+                               "PongGame2p_state", "PongGame2p_GameOnState", "PongGame2p_GameOverState"]
 #time variables
 #startTime = 0
 def main():
     #state-deklarations
-    startScreenState = True
-    menu_state = False 
-    pause_state = False
+    state = GameStates()
+    pressed = False
     
-    jumpAndRun_state = False
-    jumpAndRun_GameOnState = False
-    jumpAndRun_GameOverState = False
-    speedUp = False
-    
-    PongGameChooseGameMode_state = False
-    
-    PongGame2p_state = False
-    PongGame2p_GameOnState = False
-    PongGame2p_Tutorial_Screen = False
-    
-    PongGame1p_state = False
-    PongGame1p_GameOnState = False
-    PongGame1p_Tutorial_Screen = False
     #new Self-defined USEREVENTS
     timeToSpawnObstacle = 2000
     obstacleSpawnTimer = pygame.USEREVENT + 1
@@ -50,7 +63,8 @@ def main():
     
     firstLevel = 100
     secondLevel = 150
-    
+    speedUp = False
+        
     #Background
     background_image = mh.background_image
     background_rect1 = mh.background_rect
@@ -125,7 +139,17 @@ def main():
     scoreP1 = 0
     scoreP2 = 0
     goal = False
-        
+    def resetJar():
+        global backgroundSpeed, undergroundSpeed, speedUp, score
+        jar.environmentReset(environmentRectList)
+        backgroundSpeed = 1
+        undergroundSpeed = 4
+        player.sprite.playerReset()
+        speedUp = False
+        score = 0
+        obstacle_group.empty()
+        print("Game Over")
+        jarMusik.stop()
     #game loop
     while gameStatus:
         mouse_pos = pygame.mouse.get_pos()
@@ -138,19 +162,19 @@ def main():
             #mouseDown event handling        
             if event.type == pygame.MOUSEBUTTONDOWN:
                 #startScreen
-                if startScreenState == True:
+                if state.startScreenState == True:
                     menuMusik.play(10)     
-                    startScreenState = False    
-                    menu_state = True 
+                    state.startScreenState = False    
+                    state.menu_state = True 
                     print("StartScreen") 
                 
                 #menuScreen
-                elif menu_state:
+                elif state.menu_state:
                     if mh.defaultVektor_rect_Game1.collidepoint(mouse_pos):
-                        menu_state = False
-                        jumpAndRun_state = True
-                        jumpAndRun_GameOnState = True
-                        jumpAndRun_GameOverState = False
+                        state.menu_state = False
+                        state.jumpAndRun_state = True
+                        state.jumpAndRun_GameOnState = True
+                        state.jumpAndRun_GameOverState = False
                         menuMusik.stop()
                         gameStartSound.play()
                         time.sleep(0.2)
@@ -159,10 +183,9 @@ def main():
                         obstacle_group.empty()
                     #For next Games
                     if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos): #PingPong 1-PL
-                        menu_state = False
-                        PongGameChooseGameMode_state = True
+                        state.menu_state = False
+                        state.PongGameChooseGameMode_state = True
                         pp.chooseGamemodeScreen(screen, mouse_pos)
-                    
                     #Template
                     # if mh.defaultVektor_rect_Game3.collidepoint(mouse_pos): 
                         # do sth
@@ -170,17 +193,17 @@ def main():
                         # do Sth
                 
                 #pause state handling    
-                if pause_state:    
-                    if mh.pause_DefVektor_rect1.collidepoint(mouse_pos) and jumpAndRun_GameOnState == False:
-                        jumpAndRun_GameOnState = True
-                        pause_state = False
+                if state.pause_state:    
+                    state.pause_state, state.GameStatesList = mh.pauseResumeHandling(state, mouse_pos, state.pause_state, state.GameStatesList)
+                    if state.jumpAndRun_GameOnState: 
                         lastMeasuredTime = (pygame.time.get_ticks() - lastMeasuredTime)
                         startTime += lastMeasuredTime
-                    if mh.pause_DefVektor_rect2.collidepoint(mouse_pos) and jumpAndRun_GameOnState == False:
-                        pause_state = False
-                        jumpAndRun_state = False
-                        menu_state = True
-                        #reset jar
+                        
+                    state.pause_state, state.GameStatesList, state.menu_state = mh.pauseBacktomenuHandling(state, mouse_pos, state.pause_state, state.GameStatesList)
+                    if state.menu_state == True:
+                        pongGameBM.stop()
+                        jarMusik.stop()
+                        menuMusik.play(15)
                         jar.environmentReset(environmentRectList)
                         backgroundSpeed = 1
                         undergroundSpeed = 4
@@ -188,110 +211,115 @@ def main():
                         speedUp = False
                         score = 0
                         obstacle_group.empty()
-                        print("Game Over")
-                        jarMusik.stop()
-                        menuMusik.play(15)
-                        
+                        scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
                 #PongGame
-                elif PongGameChooseGameMode_state:
-                    PongGameChooseGameMode_state, PongGame1p_Tutorial_Screen, PongGame2p_Tutorial_Screen = pp.chooseGamemodeCollisionHandling(
+                elif state.PongGameChooseGameMode_state:
+                    state.PongGameChooseGameMode_state, state.PongGame1p_Tutorial_Screen, state.PongGame2p_Tutorial_Screen = pp.chooseGamemodeCollisionHandling(
                                                                                                                 screen=screen,
                                                                                                                 mouse_pos=mouse_pos,
-                                                                                                                ChooseGameScreenState=PongGameChooseGameMode_state,
-                                                                                                                gameMode1=PongGame1p_Tutorial_Screen,
-                                                                                                                gameMode2=PongGame2p_Tutorial_Screen) 
+                                                                                                                ChooseGameScreenState=state.PongGameChooseGameMode_state,
+                                                                                                                gameMode1=state.PongGame1p_Tutorial_Screen,
+                                                                                                                gameMode2=state.PongGame2p_Tutorial_Screen) 
                     
-                elif PongGame2p_Tutorial_Screen:
-                    PongGame2p_Tutorial_Screen = False
-                    PongGame2p_state = True
-                    PongGame2p_GameOnState = True
+                elif state.PongGame2p_Tutorial_Screen:
+                    state.PongGame2p_Tutorial_Screen = False
+                    state.PongGame2p_state = True
+                    state.PongGame2p_GameOnState = True
                     
                     menuMusik.stop()
                     gameStartSound.play()
                     time.sleep(0.2)
                     pongGameBM.play(15)      
+                   
                         
-                elif PongGame1p_Tutorial_Screen: 
-                    PongGame1p_Tutorial_Screen = False
-                    PongGame1p_state = True
-                    PongGame1p_GameOnState = True
+                elif state.PongGame1p_Tutorial_Screen: 
+                    state.PongGame1p_Tutorial_Screen = False
+                    state.PongGame1p_state = True
+                    state.PongGame1p_GameOnState = True
                     
                     menuMusik.stop()
                     gameStartSound.play()
                     time.sleep(0.2)
                     pongGameBM.play(15)  
-            
-
-            
+                    
             #KeyDown Hanlding
             if event.type == pygame.KEYDOWN:
                 
                 #menuState
-                if menu_state and event.key == pygame.K_ESCAPE:
+                if state.menu_state and event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     exit()
                 
                 #jarState
-                elif jumpAndRun_state:
+                elif state.jumpAndRun_state:
                     if event.key == pygame.K_ESCAPE:
-                        jumpAndRun_GameOnState = False
+                        state.jumpAndRun_GameOnState = False
                         lastMeasuredTime = pygame.time.get_ticks()
-                        pause_state = True
+                        state.pause_state = True
                         mh.pauseScreen(mouse_pos, mh.pause_DefVektorList, mh.pause_vektor_map)
                         
                             
-                    if jumpAndRun_GameOnState == False and jumpAndRun_GameOverState == True:
+                    if state.jumpAndRun_GameOnState == False and state.jumpAndRun_GameOverState == True:
                         if event.key == pygame.K_RETURN: #Return = EnterTaste
-                            jumpAndRun_GameOnState = True     
+                            state.jumpAndRun_GameOnState = True     
                             startTime = pygame.time.get_ticks()
                             jarMusik.play(15)
                             
-                    if jumpAndRun_GameOverState:
+                    if state.jumpAndRun_GameOverState:
                         if event.key == pygame.K_ESCAPE:
-                            jumpAndRun_state = False
-                            jumpAndRun_GameOverState = False
-                            menu_state = True
-                elif PongGameChooseGameMode_state:
+                            state.jumpAndRun_state = False
+                            state.jumpAndRun_GameOverState = False
+                            state.menu_state = True
+                elif state.PongGameChooseGameMode_state:
                     if event.key == pygame.K_ESCAPE:
-                        PongGameChooseGameMode_state = False
-                        menu_state = True
+                        state.PongGameChooseGameMode_state = False
+                        state.menu_state = True
                         
-                elif PongGame1p_state:
-                    if event.key == pygame.K_ESCAPE:
-                        PongGame1p_state = False
-                        menu_state = True
-                        jar.environmentReset(environmentRectList)
-                        
-                        pongGameBM.stop()
-                        pongGameWinner.stop()
-                        menuMusik.play(15)
-                        scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
+                elif state.PongGame1p_state:
+                    if state.PongGame1p_GameOnState and event.key == pygame.K_ESCAPE:
+                        state.PongGame1p_GameOnState = False
+                        state.pause_state = True
                     
-                    if PongGame1p_GameOnState == False:
+                    if state.PongGame1p_GameOverState == True:
                         if event.key == pygame.K_RETURN:
-                            PongGame1p_GameOnState = True
+                            state.PongGame1p_GameOnState = True
+                            state.PongGame1p_GameOverState = False
                             pongGameWinner.stop()
                             pongGameBM.play(15)
-                            
-                elif PongGame2p_state:
-                    if event.key == pygame.K_ESCAPE:
-                        PongGame2p_state = False
-                        menu_state = True
-                        jar.environmentReset(environmentRectList)
+                            scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
+                        if event.key == pygame.K_ESCAPE:
+                            state.PongGame1p_GameOnState = False
+                            state.PongGame1p_GameOverState = False
+                            state.PongGame1p_state = False
+                            state.menu_state = True
+                            pongGameBM.stop()
+                            pongGameWinner.stop()
+                            menuMusik.play(15)
+                            jar.environmentReset(environmentRectList)   
+                elif state.PongGame2p_state:
+                    if event.key == pygame.K_ESCAPE and state.PongGame2p_GameOnState:
+                        state.PongGame2p_GameOnState = False
+                        state.pause_state = True
                         
-                        pongGameBM.stop()
-                        pongGameWinner.stop()
-                        menuMusik.play(15)
-                        scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
-                        
-                    if PongGame2p_GameOnState == False:
-                        if event.key == pygame.K_RETURN:
-                            PongGame2p_GameOnState = True
+                    if state.PongGame2p_GameOverState == True:
+                        if event.key == pygame.K_RETURN: #Enter Taste
+                            state.PongGame2p_GameOnState = True
+                            state.PongGame2p_GameOverState = False
                             pongGameWinner.stop()
                             pongGameBM.play(15)
+                            scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
+                        if event.key == pygame.K_ESCAPE:
+                            state.PongGame2p_GameOnState = False
+                            state.PongGame2p_GameOverState = False
+                            state.PongGame2p_state = False
+                            state.menu_state = True
+                            pongGameBM.stop()
+                            pongGameWinner.stop()
+                            menuMusik.play(15)
+                            jar.environmentReset(environmentRectList) 
                             
             #specific event Types:
-            if jumpAndRun_GameOnState and not speedUp:
+            if state.jumpAndRun_GameOnState and not speedUp:
                 if event.type == obstacleSpawnTimer and score < firstLevel:
                     obstacle_group.add(jar.Obstacle(random.choice(['bird','tree1','tree2','bird','tree1','tree2','tree3','mushroom'])))
                 if score > secondLevel: 
@@ -299,7 +327,7 @@ def main():
                     player.sprite.playerSpeedUp()
                     backgroundSpeed = 3
                     undergroundSpeed = 12
-            if jumpAndRun_GameOnState and speedUp:
+            if state.jumpAndRun_GameOnState and speedUp:
                 if event.type == obstacleSpawnTimer_speedUp:
                     obstacle_group.add(jar.Obstacle(random.choice(['bird','tree1','tree2','bird','tree1','tree2','tree3','mushroom'])))
                     jar.obstacle_SpeedUp(obstacle_group)
@@ -307,7 +335,7 @@ def main():
                     
         #State Handling
         #startScreen Handling
-        if startScreenState:
+        if state.startScreenState:
             screen.fill((10,100,200))
             text_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 110)
             text2_font = pygame.font.Font('environment/textStyles/textStyle1.ttf', 50)
@@ -326,12 +354,12 @@ def main():
             print("StartSCreen")
         
         #pauseScreenHandling
-        if pause_state:
+        if state.pause_state:
             mh.pauseScreen(mouse_pos, mh.pause_DefVektorList, mh.pause_vektor_map)
 
         
         #menu-handling
-        if menu_state:
+        if state.menu_state:
             #KeyDown event handling
             
             #print("Menu")
@@ -340,24 +368,25 @@ def main():
             mh.menu_defaultVektorScreening(mouse_pos, mh.menu_defaultVektorRectList)
             mh.menu_vektorScreening(mh.menu_vektorMap)
             
-        if jumpAndRun_state:
+        if state.jumpAndRun_state:
             #KeyDown event handling
-            if jumpAndRun_GameOnState:
+            if state.jumpAndRun_GameOnState:
                 
                 jar.drawEnvironment(screen, background_image, underground_image, 
                                     environmentRectList)
                 jar.manageEnvironment(environmentRectList, backgroundSpeed, undergroundSpeed)
                 score = jar.drawScore(screen, startTime, highScore=highScore)
-                print("GAME ONNNN")
+                #print("GAME ONNNN")
                 highScore = jar.checkHighscore(highScore, score)
                 player.draw(screen)
                 player.update()
                 obstacle_group.draw(screen)
                 obstacle_group.update()
-                jumpAndRun_GameOnState, jumpAndRun_GameOverState= jar.collisionCheck(player, obstacle_group, gameOverSound)
+                lastScore = score
+                state.jumpAndRun_GameOnState, state.jumpAndRun_GameOverState= jar.collisionCheck(player, obstacle_group, gameOverSound)
                 
-            if jumpAndRun_GameOverState == True:
-                jar.gameOverScreen(screen)
+            if state.jumpAndRun_GameOverState == True:
+                jar.gameOverScreen(screen, lastScore)
                 backgroundSpeed = 1
                 undergroundSpeed = 4
                 jar.environmentReset(environmentRectList)
@@ -369,11 +398,11 @@ def main():
                 jarMusik.stop()
         
         #Pong Game Handling
-        if PongGameChooseGameMode_state:
+        if state.PongGameChooseGameMode_state:
             pp.chooseGamemodeScreen(screen, mouse_pos)
             
-        if PongGame1p_state:
-            if PongGame1p_GameOnState:
+        if state.PongGame1p_state:
+            if state.PongGame1p_GameOnState:
                 topBorder, bottomBorder = pp.drawPongScreen(screen, LightBlue, 'Black', gameMode='1p')
                 paddle1.draw(screen)
                 opponendPaddle.draw(screen)
@@ -381,21 +410,23 @@ def main():
                 opponendPaddle.update(ball)
                 ball.draw(screen)
                 ball.update()
+                
                 pp.collisionHandling(ball=ball, paddle1=paddle1, paddle2=opponendPaddle, topBorder=topBorder, bottomBorder=bottomBorder)
                 if goal == True: time.sleep(0.4)
                 scoreP1, scoreP2 = pp.goalManagament(ball, paddle1, paddle2, pongPointSound, scoreP1, scoreP2)
                 
                 pp.drawPongScore(screen, scoreP1, scoreP2)
-                PongGame1p_GameOnState = pp.checkWin(PongGame1p_GameOnState, scoreP1, scoreP2)
-            
-            if PongGame1p_GameOnState == False:
+                state.PongGame1p_GameOverState = pp.checkWin(state.PongGame1p_GameOnState, scoreP1, scoreP2)
+                if state.PongGame1p_GameOverState: state.PongGame1p_GameOnState = False
+                
+            if state.PongGame1p_GameOverState == True:
                 pongGameBM.stop()
-                pongGameWinner.play(1)
+                pongGameWinner.play(15)
                 pp.pongGameOverScreen(screen, scoreP1, scoreP2, gameMode='1p')
                 scoreP1, scoreP2 = pp.resetGameCompletely(ball, paddle1, paddle2, scoreP1, scoreP2)
                 
-        if PongGame2p_state:
-            if PongGame2p_GameOnState:
+        if state.PongGame2p_state:
+            if state.PongGame2p_GameOnState:
                 topBorder, bottomBorder = pp.drawPongScreen(screen, LightBlue, 'Black', gameMode='2p')
                 paddle1.draw(screen)
                 paddle2.draw(screen)
@@ -409,9 +440,10 @@ def main():
                 scoreP1, scoreP2 = pp.goalManagament(ball, paddle1, paddle2, pongPointSound, scoreP1, scoreP2)
                 
                 pp.drawPongScore(screen, scoreP1, scoreP2)
-                PongGame2p_GameOnState = pp.checkWin(PongGame2p_GameOnState, scoreP1, scoreP2)
+                state.PongGame2p_GameOverState = pp.checkWin(state.PongGame2p_GameOnState, scoreP1, scoreP2)
+                if state.PongGame2p_GameOverState: state.PongGame2p_GameOnState = False
             
-            if PongGame2p_GameOnState == False:
+            if state.PongGame2p_GameOverState == True:
                 pongGameBM.stop()
                 pongGameWinner.play(1)
                 pp.pongGameOverScreen(screen, scoreP1, scoreP2, gameMode='2p')

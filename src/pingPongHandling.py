@@ -189,21 +189,21 @@ def goalManagament(ball, paddle1, paddle2, sound, score1, score2):
         paddle2.sprite.resetPaddles()
     return score1, score2
 
+goalToEndGame = 5
+def checkWin(gameOverState, score1, score2):
+    gameOverState = False
+    if score1 == goalToEndGame or score2 == goalToEndGame:
+        gameOverState = True
+    return gameOverState
+        
 
-def checkWin(gameState, score1, score2):
-    gameState = True
-    if score1 == 5 or score2 == 5:
-        gameState = False
-    return gameState
-        
-        
 def pongGameOverScreen(screen, score1, score2, gameMode):
-    if score1 == 5:
+    if score1 == goalToEndGame:
         winner = "Player 1"
-    if score2 == 5:
+    if score2 == goalToEndGame:
         if gameMode == '2p': winner = "Player 2"
         else: winner = "Computer"
-    if score1 == 5 or score2 == 5:
+    if score1 == goalToEndGame or score2 == goalToEndGame:
         screen.fill('Blue')
         winner_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), 90)
         winner_text = winner_font.render(f"{winner} has Won!", True, 'White')
@@ -227,7 +227,9 @@ vektor_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.
 vektor_GameText1 = vektor_font.render("    1-Player    ", True, 'Black')
 vektor_GameText2 = vektor_font.render("    2-Players   ", True, 'Black')
 Vektor_rect_Game1 = vektor_GameText1.get_rect(center = vektor1center)
+Vektor_rect_Game1.x -= 70
 Vektor_rect_Game2 = vektor_GameText2.get_rect(center = vektor2center)
+Vektor_rect_Game2.x += 70
 VektorRectList = [Vektor_rect_Game1, Vektor_rect_Game2]
 
 chooseGame_font = pygame.font.Font(resource_path('environment/textStyles/textStyle1.ttf'), int(vektorGröße * 1.2))

@@ -75,14 +75,8 @@ chooseAgame_font = pygame.font.Font(resource_path('environment/textStyles/textSt
 chooseAgame_text = chooseAgame_font.render("choose a game...", True, Pink)
 chooseAgame_rect = chooseAgame_text.get_rect(center = coordinate_chooseAgame)
 
-#funktionen für screen
-# def checkColl(mouse_pos):
-#     global screen
-#     for vektor in menu_defaultVektorRectList:
-#         if vektor.collidepoint(mouse_pos):
-#             pygame.draw.rect(screen, DarkGrey, vektor, 0, 50)
-#         else:
-#             pygame.draw.rect(screen, LightGrey, vektor, 0, 50)
+
+
             
 def menu_defaultVektorScreening(mouse_pos, DefVekList):
     global screen
@@ -101,6 +95,7 @@ def menu_mainMenuPicScreening():
     screen.blit(mainMenuPic_text, mainMenuPic_rect)
     screen.blit(chooseAgame_text, chooseAgame_rect)
     
+#PAUSE HANDLING SOURCECODE
 
 pause_DefVektor_rect1 = defaultVektor_rect_Game1
 pause_DefVektor_rect2 = defaultVektor_rect_Game2
@@ -112,6 +107,33 @@ pause_vektor_map = {
     pause_vektorText_return: vektor_rect2
  }
 pause_DefVektorList = [pause_DefVektor_rect1, pause_DefVektor_rect2]
+
 def pauseScreen(mouse_pos, DefVekList, vektorMap):
     menu_defaultVektorScreening(mouse_pos, DefVekList)
     menu_vektorScreening(vektorMap)
+    
+def pauseResumeHandling(state, mouse_pos, pause_state, GameStatesList: list):
+    pause_state = True
+    for i in range (0, len(GameStatesList) - 2, 3):
+        gameState = getattr(state, GameStatesList[i])
+        gameOnState = getattr(state, GameStatesList[i + 1])
+        #checks if user presses on resume-button
+        if pause_DefVektor_rect1.collidepoint(mouse_pos) and gameState==True and gameOnState==False:
+            pause_state = False
+            setattr(state, GameStatesList[i + 1], True)
+            return pause_state, GameStatesList
+    return pause_state, GameStatesList
+    
+def pauseBacktomenuHandling(state, mouse_pos, pause_state, GameStatesList: list):
+    pause_state = True
+    menu_state = False
+    for i in range (0, len(GameStatesList) - 2, 3):
+        gameState = getattr(state, GameStatesList[i])
+        gameOnState = getattr(state, GameStatesList[i + 1])
+        #checks if user presses on resume-button
+        if pause_DefVektor_rect2.collidepoint(mouse_pos) and gameState==True and gameOnState==False:
+            pause_state = False
+            setattr(state, GameStatesList[i], False)
+            menu_state = True
+            return pause_state, GameStatesList, menu_state
+    return pause_state, GameStatesList, menu_state
