@@ -34,10 +34,12 @@ def main():
     
     PongGame2p_state = False
     PongGame2p_GameOnState = False
+    PongGame2p_GameOverState = False
     PongGame2p_Tutorial_Screen = False
     
     PongGame1p_state = False
     PongGame1p_GameOnState = False
+    PongGame1p_GameOverState = False
     PongGame1p_Tutorial_Screen = False
     #new Self-defined USEREVENTS
     timeToSpawnObstacle = 2000
