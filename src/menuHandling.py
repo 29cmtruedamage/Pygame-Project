@@ -75,14 +75,8 @@ chooseAgame_font = pygame.font.Font(resource_path('environment/textStyles/textSt
 chooseAgame_text = chooseAgame_font.render("choose a game...", True, Pink)
 chooseAgame_rect = chooseAgame_text.get_rect(center = coordinate_chooseAgame)
 
-#funktionen für screen
-# def checkColl(mouse_pos):
-#     global screen
-#     for vektor in menu_defaultVektorRectList:
-#         if vektor.collidepoint(mouse_pos):
-#             pygame.draw.rect(screen, DarkGrey, vektor, 0, 50)
-#         else:
-#             pygame.draw.rect(screen, LightGrey, vektor, 0, 50)
+
+
             
 def menu_defaultVektorScreening(mouse_pos, DefVekList):
     global screen

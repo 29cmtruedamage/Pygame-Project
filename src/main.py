@@ -173,12 +173,12 @@ def main():
                 
                 #pause state handling    
                 if pause_state:    
-                    if mh.pause_DefVektor_rect1.collidepoint(mouse_pos) and jumpAndRun_GameOnState == False:
+                    if mh.pause_DefVektor_rect1.collidepoint(mouse_pos) and jumpAndRun_GameOnState == False: #resume
                         jumpAndRun_GameOnState = True
                         pause_state = False
                         lastMeasuredTime = (pygame.time.get_ticks() - lastMeasuredTime)
                         startTime += lastMeasuredTime
-                    if mh.pause_DefVektor_rect2.collidepoint(mouse_pos) and jumpAndRun_GameOnState == False:
+                    if mh.pause_DefVektor_rect2.collidepoint(mouse_pos) and jumpAndRun_GameOnState == False: #back to menu
                         pause_state = False
                         jumpAndRun_state = False
                         menu_state = True
