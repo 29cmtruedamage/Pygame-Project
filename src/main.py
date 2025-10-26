@@ -262,6 +262,7 @@ def main():
                             state.jumpAndRun_state = False
                             state.jumpAndRun_GameOverState = False
                             state.menu_state = True
+                            menuMusik.play(15)
                             
                     if state.jumpAndRun_GameOnState == False and state.jumpAndRun_GameOverState == True:
                         if event.key == pygame.K_RETURN: #Return = EnterTaste
