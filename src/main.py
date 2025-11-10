@@ -170,7 +170,7 @@ def main():
                 
                 #menuScreen
                 elif state.menu_state:
-                    if mh.defaultVektor_rect_Game1.collidepoint(mouse_pos):
+                    if mh.defaultVektor_rect_Game1.collidepoint(mouse_pos): #Jump And Run
                         state.menu_state = False
                         state.jumpAndRun_state = True
                         state.jumpAndRun_GameOnState = True
@@ -182,7 +182,7 @@ def main():
                         startTime = pygame.time.get_ticks()
                         obstacle_group.empty()
                     #For next Games
-                    if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos): #PingPong 1-PL
+                    if mh.defaultVektor_rect_Game2.collidepoint(mouse_pos): #PingPong 
                         state.menu_state = False
                         state.PongGameChooseGameMode_state = True
                         pp.chooseGamemodeScreen(screen, mouse_pos)
@@ -250,31 +250,33 @@ def main():
                     pygame.quit()
                     exit()
                 
-                #jarState
+                #Jump And Run
                 elif state.jumpAndRun_state:
                     if event.key == pygame.K_ESCAPE:
-                        state.jumpAndRun_GameOnState = False
-                        lastMeasuredTime = pygame.time.get_ticks()
-                        state.pause_state = True
-                        mh.pauseScreen(mouse_pos, mh.pause_DefVektorList, mh.pause_vektor_map)
-                        
+                        if state.jumpAndRun_GameOnState:
+                            state.jumpAndRun_GameOnState = False
+                            lastMeasuredTime = pygame.time.get_ticks()
+                            state.pause_state = True
+                            mh.pauseScreen(mouse_pos, mh.pause_DefVektorList, mh.pause_vektor_map)
+                        if state.jumpAndRun_GameOverState:
+                            state.jumpAndRun_state = False
+                            state.jumpAndRun_GameOverState = False
+                            state.menu_state = True
+                            menuMusik.play(15)
                             
                     if state.jumpAndRun_GameOnState == False and state.jumpAndRun_GameOverState == True:
                         if event.key == pygame.K_RETURN: #Return = EnterTaste
                             state.jumpAndRun_GameOnState = True     
+                            state.jumpAndRun_GameOverState = False
                             startTime = pygame.time.get_ticks()
                             jarMusik.play(15)
-                            
-                    if state.jumpAndRun_GameOverState:
-                        if event.key == pygame.K_ESCAPE:
-                            state.jumpAndRun_state = False
-                            state.jumpAndRun_GameOverState = False
-                            state.menu_state = True
+                
+                #PongGame
                 elif state.PongGameChooseGameMode_state:
                     if event.key == pygame.K_ESCAPE:
                         state.PongGameChooseGameMode_state = False
                         state.menu_state = True
-                        
+                #PongGame 1
                 elif state.PongGame1p_state:
                     if state.PongGame1p_GameOnState and event.key == pygame.K_ESCAPE:
                         state.PongGame1p_GameOnState = False
@@ -296,6 +298,8 @@ def main():
                             pongGameWinner.stop()
                             menuMusik.play(15)
                             jar.environmentReset(environmentRectList)   
+                            
+                #PongGame 2
                 elif state.PongGame2p_state:
                     if event.key == pygame.K_ESCAPE and state.PongGame2p_GameOnState:
                         state.PongGame2p_GameOnState = False
